@@ -1,7 +1,9 @@
 version: "3"
 services:
   service:
-    build: app
+    build:
+      context: app
+      network: host
     expose:
       - "8000"
     volumes:
