@@ -6,6 +6,8 @@ services:
       network: host
     expose:
       - "8000"
+    ports:
+      - "8000:8000"
     volumes:
       - ./app/static:/var/www/:rw
     env_file:
