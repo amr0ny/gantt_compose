@@ -1,7 +1,9 @@
 version: "3"
+
 services:
   service:
-    build: app
+    build: 
+      context: app
     expose:
       - "8000"
     volumes:
@@ -10,12 +12,12 @@ services:
       - .env
     depends_on:
       - postgres
-    entrypoint: "exec /opt/app/run.sh"
+    entrypoint: "/opt/app/run.sh"
 
   postgres:
     image: postgres:16
     expose:
-      - ${POSTGRES_PORT}
+      - "${POSTGRES_PORT}"
     volumes:
       - $HOME/postgresql/data:/var/lib/postgresql/data
     environment:
@@ -33,4 +35,3 @@ services:
       - "80:80"
     depends_on:
       - service
-  
