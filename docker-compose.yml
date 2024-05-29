@@ -13,7 +13,7 @@ services:
       - .env
     depends_on:
       - postgres
-    entrypoint: "/opt/app/run.sh"
+    entrypoint: "uwsgi --strict --ini uwsgi.ini"
 
   postgres:
     image: postgres:16
