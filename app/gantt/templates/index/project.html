@@ -94,7 +94,7 @@
                                        <!-- TODO: Further, I gotta replace it with the JS to update this columns comnining with API endpoint sending data of mounths-->
                                     </div>
                                     <div class="row gantt-chart__header-container header-container js-grid-layout-days"></div>
-                                    <div class="gantt-chart-data-wrapper">
+                                    <div class="gantt-chart-data-wrapper js-sync-scrollable">
                                         <div class="gantt-chart-data-area js-grid-layout-container">
                                         </div>
                                     </div>
@@ -106,7 +106,6 @@
                         <div class="container-fluid m-2">
                             <h3>Список участников</h3>
                             <form class="js-form-member" method="post">    
-                                {% csrf_token %}
                                 <div class="form-group d-flex flex-row">
                                     <label style="width:300px;" class="align-content-center" for="username">Добавить пользователя:</label>
                                     <input class="form-control flex-fill" type="text" name="username" placeholder="Имя пользователя">
@@ -147,7 +146,6 @@
                 <!-- TODO: Change class to smth else-->
                 <form class="js-form-project" method="post">
                     <div class="modal-body">
-                        {% csrf_token %}
                         <div class="form-group row d-flex justify-content-center">
                             <div class="col">
                                 <label>Название проекта:</label>
@@ -193,7 +191,6 @@
                 </div>
                 <form class="js-form-task" method="post">
                     <div class="modal-body">
-                        {% csrf_token %}
                         <div class="form-group row d-flex justify-content-center">
                             <div class="col">
                                 <label>Название задачи:</label>
@@ -235,7 +232,6 @@
                 </div>
                 <form class="js-form-task" method="post">
                     <div class="modal-body">
-                        {% csrf_token %}
                         <div class="form-group row d-flex justify-content-center">
                             <div class="col">
                                 <label>Название вехи:</label>
