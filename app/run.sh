@@ -5,5 +5,5 @@ mkdir -p /var/log
 
 chown www-data:www-data /var/log
 
-python manage.py runserver #DO THIS ONLY IN DEBUG MODE
-#uwsgi --strict --ini uwsgi.ini
+#python manage.py runserver #DO THIS ONLY IN DEBUG MODE
+uwsgi --strict --ini uwsgi.ini
