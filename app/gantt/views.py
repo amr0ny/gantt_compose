@@ -15,8 +15,7 @@ def signup(request):
         if form.is_valid():
             form.save()
             return redirect('/signin/')
-        
-    elif request.method == 'GET':
+    else:
         form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
 
@@ -30,7 +29,7 @@ def signin(request):
             if user is not None:
                 login(request, user)
                 return redirect('/')
-    elif request.method == 'GET':
+    else:
         form = AuthenticationForm()
     return render(request, 'registration/signin.html', {'form': form})
 
