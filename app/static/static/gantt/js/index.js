@@ -9,6 +9,7 @@ import {
     AddTaskEventHandler,
     AddMilestoneShowUpEventHandler,
     AddMemberEventHandler,
+    ResetFormEventHandler
 } from './handlers/Handlers.js';
 
 $(document).ready(() => {
