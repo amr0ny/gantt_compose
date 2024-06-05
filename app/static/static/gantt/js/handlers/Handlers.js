@@ -1054,7 +1054,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedEventHandler {
     setGridLayout(data, tasks, dateObject) {
         this.emptyAll();
         let itemWidth = 30;
-        this.chartLayoutContainer.css({ width: `${data.reduce((sum, { days }) => sum + days, 0) * itemWidth}px` });
+        this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * itemWidth}px` });
         this.setCalendarGrid(dateObject);
 
         tasks.forEach((task) => {
