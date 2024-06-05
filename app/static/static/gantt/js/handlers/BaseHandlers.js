@@ -49,7 +49,6 @@ export class BaseHandler {
 
     setJsonContext(updates) {
         var scriptElement = $('#context-data');
-        console.log(`setJsonContext: ${new Date().getTime()}`);
         if (scriptElement.length === 0) {
             console.error('Element with id "context-data" not found.');
             return;
@@ -330,9 +329,6 @@ export class BaseFormEventHandler extends BasePOSTEventHandler {
     getContextData(event) {
         const target = event.target;
         const formData = new FormData(target);
-        for (let pair of formData.entries()) {
-            console.log(pair);
-        }
         return formData;
     }
 
