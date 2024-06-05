@@ -521,7 +521,7 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
         const task = this.task;
         const tableRow = this.createElement('div', ['chart-table__task-row', 'task-row'], { 'data-task-id': task.id });
         const tableRemoveCol = this.createElement('div', ['col-md-1', 'js-task-col-remove'], { 'data-task-id': task.id, 'data-entity': 'task' });
-        const tableTaskCol = this.createElement('div', ['table-row__item', 'col-md-3', 'js-task-col-name', 'js-editable'], { 'data-entity-id': task.id, 'data-field': 'name', 'data-entity': 'task' }, undefined);
+        const tableTaskCol = this.createElement('div', ['table-row__item', 'col-md-3', 'js-task-col-name', ], { 'data-entity-id': task.id, 'data-field': 'name', 'data-entity': 'task' }, undefined);
         const tableAssigneeCol = this.createElement('div', ['table-row__item', 'col-md-3', 'js-task-col-assignee']);
         const tableStatusCol = this.createElement('div', ['table-row__item', 'col', 'js-task-col-status', 'js-dropdown-field']);
         const tableStartDateCol = this.createElement('div', ['table-row__item', 'col', 'js-task-col-start-datetime']);
@@ -547,7 +547,7 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
     }
 
     renderNameColumn(column, task) {
-        const tableName = this.createElement('div', ['task-row__text-container'], {}, task.name);
+        const tableName = this.createElement('div', ['task-row__text-container', 'js-editable'], { 'data-entity-id': task.id, 'data-field': 'name', 'data-entity': 'task' }, task.name);
         column.append(tableName);
     }
     renderAssigneeColumn(column, task) {
