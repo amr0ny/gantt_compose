@@ -22,6 +22,7 @@ $(document).ready(() => {
     var addMilestoneShowUpEventHandler = new AddMilestoneShowUpEventHandler();
     var createProjectEventHandler = new CreateProjectEventHandler();
     var addMemberEventHandler = new AddMemberEventHandler();
+    var resetFormEventHandler = new ResetFormEventHandler();
     dialogModalShowUpLoader.setupEventHandler();
     projectListLoader.setupEventHandler();
     createProjectEventHandler.setupEventHandler();
@@ -32,5 +33,6 @@ $(document).ready(() => {
     addMilestoneShowUpEventHandler.setupEventHandler();
     addMemberEventHandler.setupEventHandler();
     modalBackgroundEventHandler.setupEventHandler();
+    resetFormEventHandler.setupEventHandler();
 });
 

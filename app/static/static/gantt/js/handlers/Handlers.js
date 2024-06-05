@@ -1500,7 +1500,7 @@ export class DraggableGridEventHandler extends BaseHandler {
     }
 }
 
-export class ResetFormEventHandler extends BaseDefaultEventHandler() {
+export class ResetFormEventHandler extends BaseDefaultEventHandler {
     constructor() {
         super('.js-form', 'submit');
     }
