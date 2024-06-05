@@ -1507,6 +1507,6 @@ export class ResetFormEventHandler extends BaseDefaultEventHandler {
     }
 
     eventHandler() {
-        $('input').val('');
+        $('input:not([type=hidden])').val('');
     }
 }
