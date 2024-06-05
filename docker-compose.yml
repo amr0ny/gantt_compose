@@ -13,8 +13,6 @@ services:
       - .env
     depends_on:
       - postgres
-    networks:
-      - app_network
 
   postgres:
     image: postgres:16
@@ -28,8 +26,6 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     env_file:
       - .env
-    networks:
-      - app_network
 
   nginx:
     image: nginx:latest
@@ -41,9 +37,3 @@ services:
       - "80:80"
     depends_on:
       - service
-    networks:
-      - app_network
-
-networks:
-  app_network:
-    driver: bridge
