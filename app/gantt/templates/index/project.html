@@ -14,9 +14,9 @@
             <li class="nav-item clickable">
                 <div class="nav-link text-white" id="js-modal-btn-project-list">Все проекты</div>
                 </li>
-            <!--<li class="nav-item clickable">
+            {#<!-- <li class="nav-item clickable">
                 <div class="nav-link text-white" style="text-wrap: nowrap;" id="js-modal-btn-sidebar-tasks">Мои задачи <span style="font-size: 10px;" class="badge badge-light badge-pill">В разработке</span></div>
-            </li> -->
+            </li> -->#}
             <div class="container-fluid logout-wrapper">
                 <a class="logout-btn btn btn-light btn-sm" href="/logout/">Выйти из аккаунта</a>
             </div>
@@ -106,12 +106,12 @@
                     <div id="js-navbar-members-tab" class="container tab-pane fade">
                         <div class="container-fluid m-2">
                             <h3>Список участников</h3>
-                            <form class="js-form-member" method="post">    
+                            <form class="js-form js-form-member" method="post">    
                                 <div class="form-group d-flex flex-row">
                                     <label style="width:300px;" class="align-content-center" for="username">Добавить пользователя:</label>
                                     <input class="form-control flex-fill" type="text" name="username" placeholder="Имя пользователя">
                                     <input type="hidden" name="role" value="editor">
-                                    <button type="submit" class="btn btn-primary">Добавить</button>
+                                    <button type="submit" class="js-submit-input btn btn-primary">Добавить</button>
                                 </div>
                             </form>
                             <hr>
@@ -145,7 +145,7 @@
                     <h4 class="modal-title">Создайте проект</h4>
                 </div>
                 <!-- TODO: Change class to smth else-->
-                <form class="js-form-project" method="post">
+                <form class="js-form js-form-project" method="post">
                     <div class="modal-body">
                         <div class="form-group row d-flex justify-content-center">
                             <div class="col">
@@ -165,7 +165,7 @@
                         </div>
                     </div>
                     <div class="modal-footer bg-transparent">
-                        <button type="submit" class="btn btn-primary">Создать</button>
+                        <button type="submit" class="js-submit-input btn btn-primary">Создать</button>
                     </div>
                 </form>
             </div>
@@ -190,7 +190,7 @@
                 <div class="modal-header">
                     <h4 class="modal-title">Добавить задачу</h4>
                 </div>
-                <form class="js-form-task" method="post">
+                <form class="js-form js-form-task" method="post">
                     <div class="modal-body">
                         <div class="form-group row d-flex justify-content-center">
                             <div class="col">
@@ -219,7 +219,7 @@
                         <input type="hidden" name="type" value="task">
                     </div>
                     <div class="modal-footer bg-transparent">
-                        <button type="submit" class="btn btn-primary">Добавить</button>
+                        <button type="submit" class="js-submit-input btn btn-primary">Добавить</button>
                     </div>
                 </form>
             </div>
@@ -231,7 +231,7 @@
                 <div class="modal-header">
                     <h4 class="modal-title">Добавить веху</h4>
                 </div>
-                <form class="js-form-task" method="post">
+                <form class="js-form js-form-task" method="post">
                     <div class="modal-body">
                         <div class="form-group row d-flex justify-content-center">
                             <div class="col">
@@ -252,7 +252,7 @@
                         <input type="hidden" name="type" value="milestone">
                     </div>
                     <div class="modal-footer bg-transparent">
-                        <button type="submit" class="btn btn-primary">Создать</button>
+                        <button type="submit" class="js-submit-input btn btn-primary">Добавить</button>
                     </div>
                 </form>
             </div>

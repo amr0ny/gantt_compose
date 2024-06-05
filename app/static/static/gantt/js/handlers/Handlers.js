@@ -1499,3 +1499,13 @@ export class DraggableGridEventHandler extends BaseHandler {
         // This method could be extended for custom handling.
     }
 }
+
+export class ResetFormEventHandler extends BaseDefaultEventHandler() {
+    constructor() {
+        super('.js-form', 'submit');
+    }
+
+    eventHandler() {
+        $('input').val('');
+    }
+}
