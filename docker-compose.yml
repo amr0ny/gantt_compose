@@ -3,11 +3,8 @@ services:
   service:
     build:
       context: app
-      network: host
     expose:
       - "8000"
-    ports:
-      - "8000:8000"
     volumes:
       - ./app/static:/var/www/:rw
       - ./app/logs:/opt/app/logs/:rw
@@ -15,6 +12,8 @@ services:
       - .env
     depends_on:
       - postgres
+    networks:
+      - app_network
 
   postgres:
     image: postgres:16
@@ -28,6 +27,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     env_file:
       - .env
+    networks:
+      - app_network
 
   nginx:
     image: nginx:latest
@@ -39,3 +40,9 @@ services:
       - "80:80"
     depends_on:
       - service
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
