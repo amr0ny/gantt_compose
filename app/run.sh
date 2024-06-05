@@ -1,6 +1,7 @@
 #!/bin/bash
 mkdir -p /var/www/static
 mkdir -p /var/www/media
+mkdir -p /var/log
 
 chown www-data:www-data /var/log
 
