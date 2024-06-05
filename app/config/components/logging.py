@@ -1,31 +1,41 @@
-import os
+import sys
+import logging
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
     'handlers': {
-        'file': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+        },
+        'error_console': {
             'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/django_error.log',
-            'formatter': 'verbose',
+            'class': 'logging.StreamHandler',
+            'stream': sys.stderr,
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
+            'handlers': ['console'],
+            'level': 'INFO',
             'propagate': True,
+        },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['error_console'],
+            'level': 'ERROR',
+            'propagate': False,
         },
     },
 }
