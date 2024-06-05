@@ -76,7 +76,7 @@ width: 240px;
 
 .chart-table {
     margin: 0 !important;
-    width: 400px;
+    max-width: 602px;
     overflow-x: scroll;
     overflow-y: hidden;
 }
