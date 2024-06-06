@@ -701,7 +701,7 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
             'data-task-id': this.task.id,
         }, this.task.name);
         if (this.task.type === 'milestone') {
-            this.renderMilestoneTask(taskElement, width, leftPosition);
+            this.renderMilestoneTask(taskElement, tableItemWidth, leftPosition);
         } else if (this.task.type === 'task') {
             this.renderRegularTask(taskElement, width, leftPosition, this.task.color);
         }
@@ -709,7 +709,6 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
     }
 
     renderMilestoneTask(element, width, leftPosition) {
-        width = 30;
         element.addClass('rounded').css({
             position: 'absolute',
             left: `${leftPosition}px`,
@@ -1059,7 +1058,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedEventHandler {
 
     setGridLayout(data, tasks, dateObject) {
         this.emptyAll();
-        let itemWidth = 30;
+        let itemWidth = 30.5;
         this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * itemWidth}px` });
         this.setCalendarGrid(dateObject);
 
