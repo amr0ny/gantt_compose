@@ -1,3 +1,10 @@
+import 'https://cdn.interactjs.io/v1.9.20/auto-start/index.js'
+import 'https://cdn.interactjs.io/v1.9.20/actions/drag/index.js'
+import 'https://cdn.interactjs.io/v1.9.20/actions/resize/index.js'
+import 'https://cdn.interactjs.io/v1.9.20/modifiers/index.js'
+import 'https://cdn.interactjs.io/v1.9.20/dev-tools/index.js'
+import interact from 'https://cdn.interactjs.io/v1.9.20/interactjs/index.js'
+
 import {
     BaseHandler,
     BaseAbbreviatedEventHandler,
@@ -13,7 +20,6 @@ import {
     BaseAbbreviatedPOSTEventHandler,
     BaseAbbreviatedGETEventHandler,
 } from './BaseHandlers.js';
-
 
 export class DocumentReadyContentLoader extends BaseDocumentReadyHandler {
     eventHandler() {
@@ -1105,8 +1111,14 @@ class GridLayoutTaskLoader extends BaseAbbreviatedEventHandler {
 
         let firstTaskDatetime, lastTaskDatetime;
         if (!this.noTasks) {
-            firstTaskDatetime = new Date(tasks[0].start_datetime);
-            lastTaskDatetime = new Date(tasks[tasks.length - 1].end_datetime);
+            let key = 'start_datetime';
+            firstTaskDatetime = new Date(tasks.reduce((min, obj) => {
+                return obj[key] < min[key] ? obj : min;
+              }, tasks[0])[key]);
+            key = 'end_datetime';
+            lastTaskDatetime = new Date(tasks.reduce((max, obj) => {
+                return obj[key] > max[key] ? obj : max;
+              }, tasks[0])[key]);
         } else {
             firstTaskDatetime = new Date(data.start_date);
             lastTaskDatetime = new Date(firstTaskDatetime.getFullYear(), firstTaskDatetime.getMonth() + 2, firstTaskDatetime.getDate());
