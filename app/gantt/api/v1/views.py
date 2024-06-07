@@ -12,7 +12,6 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import ProjectReadSerializer, ProjectWriteSerializer, TaskReadSerializer, TaskWriteSerializer, PersonProjectReadSerializer, PersonProjectWriteSerializer
 from .permissions import IsCreatorOrTeamMemberPermission
 
-# ! Must fix the bug with permissions
 class ProjectViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsCreatorOrTeamMemberPermission]
     pagination_class = None
@@ -33,13 +32,37 @@ class ProjectViewSet(ModelViewSet):
         headers = self.get_success_headers(read_serializer.data)
         return Response(read_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        field_names = request.query_params.get('fields', None)
+        response_data = {}
+        if field_names:
+            fields = field_names.split(',')
+            for field in fields:
+                if not hasattr(instance, field):
+                    return Response({"error": f"Field '{field}' not found"}, status=status.HTTP_400_BAD_REQUEST)
+                response_data[field] = getattr(instance, field)
+        else:    
+            serializer = self.get_serializer(instance)
+            response_data = serializer.data
+        return Response(response_data, status=status.HTTP_200_OK)
+    
     def list(self, request, *args, **kwargs):
+        field_names = request.query_params.get('fields', None)
         queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
         response_data = {
             'count': queryset.count(),
-            'results': serializer.data
         }
+        if field_names:
+            fields = field_names.split(',')
+            if not all(field in [f.name for f in Project._meta.fields] for field in fields):
+                return Response({"error": "One or more fields not found"}, status=status.HTTP_400_BAD_REQUEST)
+            values = queryset.values(*fields)
+            response_data['results'] = list(values)
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            response_data['results'] = serializer.data
+        
         return Response(response_data)
     
     def get_serializer_context(self):
@@ -52,28 +75,7 @@ class ProjectViewSet(ModelViewSet):
             return ProjectReadSerializer
         return ProjectWriteSerializer
 
-    @action(detail=True, methods=['post'], permission_classes=[IsCreatorOrTeamMemberPermission])
-    def add_member(self, request, pk=None):
-        project = self.get_object()
-        user_id = request.data.get('user_id')
-        if user_id:
-            try:
-                user = get_user_model().objects.get(id=user_id)
-                project.members.add(user)
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except get_user_model().DoesNotExist:
-                return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-        return Response({"detail": "User ID not provided"}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=['post'], permission_classes=[IsCreatorOrTeamMemberPermission])
-    def add_task(self, request, pk=None):
-        project = self.get_object()
-        serializer = TaskWriteSerializer(data=request.data, context={'request': request, 'project': project})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
 
 class TaskViewSet(ModelViewSet):
     permission_classes = [IsCreatorOrTeamMemberPermission]

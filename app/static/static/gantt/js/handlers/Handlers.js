@@ -27,7 +27,7 @@ export class DocumentReadyContentLoader extends BaseDocumentReadyHandler {
         var projectId = jsonContext.project.id;
         if (!projectId) {
             $.ajax({
-                url: '/api/v1/projects/',
+                url: '/api/v1/projects/?fields=id',
                 type: 'GET',
                 dataType: 'JSON',
                 success: (data) => {
@@ -200,20 +200,15 @@ export class AddTaskEventHandler extends BaseFormEventHandler {
     }
 
     eventHandler(data) {
-        var gridLayoutTaskLoader = new GridLayoutTaskLoader();
+        const jsonContext = this.parseJsonContext();
+        const projectId = jsonContext.project.id;
+        var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
         var editableEventHandler = new EditableEventHandler();
         var dropdownEditableEventHandler = new DropdownEditableEventHandler();
         var assigneesEventHandler = new TaskAssigneesEventHandler();
         var datetimeEventHandler = new TaskDatetimeEventHandler();
         var removeTaskEventHandler = new RemoveTaskEventHandler();
-        gridLayoutTaskLoader.eventHandler().then(() => {
-            removeTaskEventHandler.setupEventHandler();
-            editableEventHandler.setupEventHandler();
-            dropdownEditableEventHandler.setupEventHandler();
-            assigneesEventHandler.setupEventHandler();
-            datetimeEventHandler.setupEventHandler();
-            const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
-        });
+        gridLayoutTaskLoader.eventHandler();
         $('#modal-create-task').modal('hide');
     }
 }
@@ -308,20 +303,10 @@ export class RemoveTaskEventHandler extends BaseDLTEventHandler {
     }
 
     eventHandler() {
-        var gridLayoutTaskLoader = new GridLayoutTaskLoader();
-        var editableEventHandler = new EditableEventHandler();
-        var dropdownEditableEventHandler = new DropdownEditableEventHandler();
-        var assigneesEventHandler = new TaskAssigneesEventHandler();
-        var datetimeEventHandler = new TaskDatetimeEventHandler();
-        var removeTaskEventHandler = new RemoveTaskEventHandler();
-        gridLayoutTaskLoader.eventHandler().then(() => {
-            removeTaskEventHandler.setupEventHandler();
-            editableEventHandler.setupEventHandler();
-            dropdownEditableEventHandler.setupEventHandler();
-            assigneesEventHandler.setupEventHandler();
-            datetimeEventHandler.setupEventHandler();
-            const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
-        });
+        const jsonContext = this.parseJsonContext();
+        const projectId = jsonContext.project.id;
+        var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+        gridLayoutTaskLoader.eventHandler();
     }
 
 }
@@ -397,25 +382,15 @@ export class EditablePATCHEventHandler extends BaseAbbreviatedPATCHEventHandler 
     }
     
     success(data, element) {
+        const jsonContext = this.parseJsonContext();
+        const projectId = jsonContext.project.id;
         if ($(element).attr('data-entity') === 'project') {
-            var abbreviatedProjectNameLoader = new AbbreviatedProjectNameLoader();
-            abbreviatedProjectNameLoader.eventHandler(data);
+            var abbreviatedProjectNameLoader = new AbbreviatedProjectNameLoader(projectId);
+            abbreviatedProjectNameLoader.eventHandler();
         }
         else {
-            var gridLayoutTaskLoader = new GridLayoutTaskLoader();
-            var editableEventHandler = new EditableEventHandler();
-            var dropdownEditableEventHandler = new DropdownEditableEventHandler();
-            var assigneesEventHandler = new TaskAssigneesEventHandler();
-            var datetimeEventHandler = new TaskDatetimeEventHandler();
-            var removeTaskEventHandler = new RemoveTaskEventHandler();
-            gridLayoutTaskLoader.eventHandler().then(() => {
-                removeTaskEventHandler.setupEventHandler();
-                editableEventHandler.setupEventHandler();
-                dropdownEditableEventHandler.setupEventHandler();
-                assigneesEventHandler.setupEventHandler();
-                datetimeEventHandler.setupEventHandler();
-                const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
-            });
+            var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+            gridLayoutTaskLoader.eventHandler();
         }
     }
 }
@@ -771,20 +746,10 @@ export class TaskAssigneesEventHandler extends BasePATCHEventHandler {
     eventHandler(res, event) {
         var target = event.target.closest('.dropdown-menu');
         $(target).dropdown('toggle');
-        var gridLayoutTaskLoader = new GridLayoutTaskLoader();
-        var editableEventHandler = new EditableEventHandler();
-        var dropdownEditableEventHandler = new DropdownEditableEventHandler();
-        var assigneesEventHandler = new TaskAssigneesEventHandler();
-        var datetimeEventHandler = new TaskDatetimeEventHandler();
-        var removeTaskEventHandler = new RemoveTaskEventHandler();
-        gridLayoutTaskLoader.eventHandler().then(() => {
-            removeTaskEventHandler.setupEventHandler();
-            editableEventHandler.setupEventHandler();
-            dropdownEditableEventHandler.setupEventHandler();
-            assigneesEventHandler.setupEventHandler();
-            datetimeEventHandler.setupEventHandler();
-            const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
-        });
+        const jsonContext = this.parseJsonContext();
+        const projectId = jsonContext.project.id;
+        var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+        gridLayoutTaskLoader.eventHandler();
     }
 }
 
@@ -820,20 +785,10 @@ export class TaskDatetimeEventHandler extends BasePATCHEventHandler {
     eventHandler(res, event) {
         var target = event.target.closest('.dropdown-menu');
         $(target).dropdown('toggle');
-        var gridLayoutTaskLoader = new GridLayoutTaskLoader();
-        var editableEventHandler = new EditableEventHandler();
-        var dropdownEditableEventHandler = new DropdownEditableEventHandler();
-        var assigneesEventHandler = new TaskAssigneesEventHandler();
-        var datetimeEventHandler = new TaskDatetimeEventHandler();
-        var removeTaskEventHandler = new RemoveTaskEventHandler();
-        gridLayoutTaskLoader.eventHandler().then(() => {
-            removeTaskEventHandler.setupEventHandler();
-            editableEventHandler.setupEventHandler();
-            dropdownEditableEventHandler.setupEventHandler();
-            assigneesEventHandler.setupEventHandler();
-            datetimeEventHandler.setupEventHandler();
-            const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
-        });
+        const jsonContext = this.parseJsonContext();
+        const projectId = jsonContext.project.id;
+        var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+        gridLayoutTaskLoader.eventHandler();
     }
 }
 
@@ -864,16 +819,21 @@ export class AbbreviatedNewMemberLoader extends BaseAbbreviatedEventHandler {
     }
 }
 
-export class AbbreviatedProjectNameLoader extends BaseAbbreviatedEventHandler {
-    constructor() {
+export class AbbreviatedProjectNameLoader extends BaseAbbreviatedGETEventHandler {
+    constructor(projectId) {
         super();
+        this.projectId = projectId;
         this.element = $('.js-project-name');
         if (this.element.length === 0) {
             throw new Error('Element is unavailable.');
         }
     }
 
-    eventHandler(data) {
+    getEndpoint() {
+        return `/api/v1/projects/${this.projectId}/?fields=name`;
+    }
+
+    success(data) {
         if (!data?.name) {
             throw new Error('Project name is undefined.');
         }
@@ -881,9 +841,10 @@ export class AbbreviatedProjectNameLoader extends BaseAbbreviatedEventHandler {
     }
 }
 
-export class AbbreviatedProjectStatusLoader extends BaseAbbreviatedEventHandler {
-    constructor() {
+export class AbbreviatedProjectStatusLoader extends BaseAbbreviatedGETEventHandler {
+    constructor(projectId) {
         super();
+        this.projectId = projectId;
         var jsonContext = this.parseJsonContext();
         this.statuses = jsonContext.content.statuses;
         this.element = $('.js-project-status');
@@ -891,8 +852,10 @@ export class AbbreviatedProjectStatusLoader extends BaseAbbreviatedEventHandler 
             throw new Error('Element is unavailable.');
         }
     }
-
-    eventHandler(data, target) {
+    getEndpoint() {
+        return `/api/v1/projects/${this.projectId}/?fields=status`;
+    }
+    success(data, target) {
         if (!data?.status) {
             throw new Error('Project status is undefined.');
         }
@@ -913,9 +876,10 @@ export class AbbreviatedProjectStatusLoader extends BaseAbbreviatedEventHandler 
     }
 }
 
-export class AbbreviatedProjectRoleLoader extends BaseAbbreviatedEventHandler {
-    constructor() {
+export class AbbreviatedProjectRoleLoader extends BaseAbbreviatedGETEventHandler {
+    constructor(projectId) {
         super();
+        this.projectId = projectId;
         this.element = $('.js-project-role');
         var jsonContext = this.parseJsonContext();
         this.roles = jsonContext.content.roles;
@@ -925,12 +889,12 @@ export class AbbreviatedProjectRoleLoader extends BaseAbbreviatedEventHandler {
         }
     }
 
-    eventHandler(data) {
-        if (!data?.members) {
-            throw new Error('Project members are undefined.');
-        }
+    getEndpoint() {
+        return `/api/v1/projects/${this.projectId}/members/`;
+    }
 
-        const member = data.members.find(member => member.person.id === this.userId);
+    success(data) {
+        const member = data.find(member => member.person.id === this.userId);
         if (!member) {
             throw new Error('Member was not found.');
         }
@@ -940,9 +904,10 @@ export class AbbreviatedProjectRoleLoader extends BaseAbbreviatedEventHandler {
 }
 
 //! AJAX Request spotted
-class GridLayoutTaskLoader extends BaseAbbreviatedEventHandler {
-    constructor() {
+class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
+    constructor(projectId) {
         super();
+        this.projectId = projectId;
         this.noTasks = false;
         var jsonContext = this.parseJsonContext();
         this.months = jsonContext.content.months;
@@ -956,6 +921,53 @@ class GridLayoutTaskLoader extends BaseAbbreviatedEventHandler {
             throw new Error('Elements are unavailable.');
         }
     }
+
+    getEndpoint() {
+        return `/api/v1/projects/${this.projectId}`;
+    }
+
+      
+    success(data) {
+        const tasks = data.tasks;
+        if (!tasks.length) {
+            this.noTasks = true;
+        }
+
+        let firstTaskDatetime, lastTaskDatetime;
+        if (!this.noTasks) {
+            let key = 'start_datetime';
+            firstTaskDatetime = new Date(tasks.reduce((min, obj) => {
+                return obj[key] < min[key] ? obj : min;
+              }, tasks[0])[key]);
+            key = 'end_datetime';
+            lastTaskDatetime = new Date(tasks.reduce((max, obj) => {
+                return obj[key] > max[key] ? obj : max;
+              }, tasks[0])[key]);
+        } else {
+            firstTaskDatetime = new Date(data.start_date);
+            lastTaskDatetime = new Date(firstTaskDatetime.getFullYear(), firstTaskDatetime.getMonth() + 2, firstTaskDatetime.getDate());
+        }
+
+        const gridMonths = this.getMonthYearArray(firstTaskDatetime, lastTaskDatetime);
+        const dateObject = this.getDateObjects(gridMonths);
+        this.setGridLayout(data, tasks, dateObject);
+
+        const editableEventHandler = new EditableEventHandler();
+        const dropdownEditableEventHandler = new DropdownEditableEventHandler();
+        const assigneesEventHandler = new TaskAssigneesEventHandler();
+        const datetimeEventHandler = new TaskDatetimeEventHandler();
+        const removeTaskEventHandler = new RemoveTaskEventHandler();
+        const syncScrollableEventHandler = new SyncScrollableEventHandler();
+        syncScrollableEventHandler.setupEventHandler();
+        removeTaskEventHandler.setupEventHandler();
+        editableEventHandler.setupEventHandler();
+        dropdownEditableEventHandler.setupEventHandler();
+        assigneesEventHandler.setupEventHandler();
+        datetimeEventHandler.setupEventHandler();
+        const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
+
+    }
+
 
     emptyAll() {
         this.gridLayoutMonthsElement.empty();
@@ -987,7 +999,6 @@ class GridLayoutTaskLoader extends BaseAbbreviatedEventHandler {
         return result;
     }
     
-
     getDateObjects(gridMonths) {
         return gridMonths.map(([month, year]) => ({
             month,
@@ -1058,7 +1069,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedEventHandler {
 
     setGridLayout(data, tasks, dateObject) {
         this.emptyAll();
-        let itemWidth = 30.5;
+        let itemWidth = 29;
         this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * itemWidth}px` });
         this.setCalendarGrid(dateObject);
 
@@ -1070,63 +1081,6 @@ class GridLayoutTaskLoader extends BaseAbbreviatedEventHandler {
         this.setProjectBorders(tasks, dateObject);
     }
 
-    eventHandler() {
-        const jsonContext = this.parseJsonContext();
-        const projectId = jsonContext.project.id;
-        if (!projectId) {
-            throw new Error("Context data doesn't contain project id");
-        }
-
-        return new Promise((resolve, reject) => {
-            $.ajax({
-                type: 'GET',
-                url: `/api/v1/projects/${projectId}/`,
-                dataType: 'JSON',
-                success: (data) => {
-                    try {
-                        this.success(data);
-                        resolve(data);
-                    } catch (error) {
-                        reject(error);
-                    }
-                },
-                error: (error) => {
-                    console.error(error);
-                    reject(error);
-                }
-            });
-        });
-    }
-
-    success(data) {
-        if (!data.hasOwnProperty('tasks')) {
-            throw new Error('Server response doesn\'t contain tasks field.');
-        }
-
-        const tasks = data.tasks;
-        if (!tasks.length) {
-            this.noTasks = true;
-        }
-
-        let firstTaskDatetime, lastTaskDatetime;
-        if (!this.noTasks) {
-            let key = 'start_datetime';
-            firstTaskDatetime = new Date(tasks.reduce((min, obj) => {
-                return obj[key] < min[key] ? obj : min;
-              }, tasks[0])[key]);
-            key = 'end_datetime';
-            lastTaskDatetime = new Date(tasks.reduce((max, obj) => {
-                return obj[key] > max[key] ? obj : max;
-              }, tasks[0])[key]);
-        } else {
-            firstTaskDatetime = new Date(data.start_date);
-            lastTaskDatetime = new Date(firstTaskDatetime.getFullYear(), firstTaskDatetime.getMonth() + 2, firstTaskDatetime.getDate());
-        }
-
-        const gridMonths = this.getMonthYearArray(firstTaskDatetime, lastTaskDatetime);
-        const dateObject = this.getDateObjects(gridMonths);
-        this.setGridLayout(data, tasks, dateObject);
-    }
 }
 
 class DropdownEditableEventHandler extends BaseAbbreviatedEventHandler {
@@ -1216,9 +1170,10 @@ class DropdownEditableEventHandler extends BaseAbbreviatedEventHandler {
     }
 
     success(data, element) {
+        var jsonContext = this.parseJsonContext();
         if ($(element).attr('data-entity') === 'project') {
-            var projectStatusLoader = new AbbreviatedProjectStatusLoader();
-            projectStatusLoader.eventHandler(data);
+            var projectStatusLoader = new AbbreviatedProjectStatusLoader(jsonContext.project.id);
+            projectStatusLoader.eventHandler()
         }
         else if($(element).attr('data-entity') === 'task') {
             var jsonContext = this.parseJsonContext();
@@ -1274,10 +1229,10 @@ export class AbbreviatedProjectLoader extends BaseAbbreviatedEventHandler {
     constructor(projectId) {
         super();
         this.projectId = projectId;
-        this.projectNameLoader = new AbbreviatedProjectNameLoader();
-        this.projectStatusLoader = new AbbreviatedProjectStatusLoader();
-        this.projectRoleLoader = new AbbreviatedProjectRoleLoader();
-        this.gridLayoutLoader = new GridLayoutTaskLoader();
+        this.projectNameLoader = new AbbreviatedProjectNameLoader(projectId);
+        this.projectStatusLoader = new AbbreviatedProjectStatusLoader(projectId);
+        this.projectRoleLoader = new AbbreviatedProjectRoleLoader(projectId);
+        this.gridLayoutLoader = new GridLayoutTaskLoader(projectId);
         //members tab
         this.membersLoader = new MembersLoader();
         this.editableEventHandler = new EditableEventHandler();
@@ -1300,20 +1255,11 @@ export class AbbreviatedProjectLoader extends BaseAbbreviatedEventHandler {
     // Event handler method
     eventHandler(data) {
         this.saveProjectState(data.id).then(() => {
-            this.projectNameLoader.eventHandler(data);
-            this.projectStatusLoader.eventHandler(data);
-            this.projectRoleLoader.eventHandler(data);
+            this.projectNameLoader.eventHandler();
+            this.projectStatusLoader.eventHandler();
+            this.projectRoleLoader.eventHandler();
             this.membersLoader.eventHandler();
-            this.gridLayoutLoader.eventHandler().then(() => {
-                this.syncScrollableEventHandler = new SyncScrollableEventHandler();
-                this.syncScrollableEventHandler.setupEventHandler();
-                this.removeTaskEventHandler.setupEventHandler();
-                this.editableEventHandler.setupEventHandler();
-                this.dropdownEditableEventHandler.setupEventHandler();
-                this.assigneesEventHandler.setupEventHandler();
-                this.datetimeEventHandler.setupEventHandler();
-                const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
-            });
+            this.gridLayoutLoader.eventHandler();
         });
     }
 }
@@ -1348,7 +1294,7 @@ export class ProjectListLoader extends BaseGETEventHandler {
     constructor() {
         let e = 'shown.bs.modal';
         const selector = '#modal-project-list';
-        const endpoint = '/api/v1/projects/';
+        const endpoint = '/api/v1/projects/?fields=id,name,start_date';
         super(selector, e, endpoint);
         this.projectListElement = $('.js-project-list');
         this.isEmpty = false;
@@ -1465,20 +1411,10 @@ export class DraggableGridEventHandler extends BaseHandler {
                             xhr.setRequestHeader("X-CSRFToken", csrftoken);
                         },
                         success: (res) => {
-                            var gridLayoutTaskLoader = new GridLayoutTaskLoader();
-                            var editableEventHandler = new EditableEventHandler();
-                            var dropdownEditableEventHandler = new DropdownEditableEventHandler();
-                            var assigneesEventHandler = new TaskAssigneesEventHandler();
-                            var datetimeEventHandler = new TaskDatetimeEventHandler();
-                            var removeTaskEventHandler = new RemoveTaskEventHandler();
-                            gridLayoutTaskLoader.eventHandler().then(() => {
-                                removeTaskEventHandler.setupEventHandler();
-                                editableEventHandler.setupEventHandler();
-                                dropdownEditableEventHandler.setupEventHandler();
-                                assigneesEventHandler.setupEventHandler();
-                                datetimeEventHandler.setupEventHandler();
-                                const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
-                            });
+                            const jsonContext = this.parseJsonContext();
+                            const projectId = jsonContext.project.id;
+                            var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+                            gridLayoutTaskLoader.eventHandler();
                         },
                         error: (_xhr, textStatus, errorThrown) => {
                             if (textStatus === "timeout") {
