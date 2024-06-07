@@ -905,9 +905,10 @@ export class AbbreviatedProjectRoleLoader extends BaseAbbreviatedGETEventHandler
 
 //! AJAX Request spotted
 class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
-    constructor(projectId) {
+    constructor(projectId, viewMode = 'days') {
         super();
         this.projectId = projectId;
+        this.viewMode = viewMode;  // 'days', 'weeks', 'months'
         this.noTasks = false;
         var jsonContext = this.parseJsonContext();
         this.months = jsonContext.content.months;
@@ -926,7 +927,6 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         return `/api/v1/projects/${this.projectId}`;
     }
 
-      
     success(data) {
         const tasks = data.tasks;
         if (!tasks.length) {
@@ -965,9 +965,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         assigneesEventHandler.setupEventHandler();
         datetimeEventHandler.setupEventHandler();
         const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
-
     }
-
 
     emptyAll() {
         this.gridLayoutMonthsElement.empty();
@@ -985,20 +983,18 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         let start = new Date(startDate);
         let end = new Date(endDate);
 
-        // Корректируем даты, чтобы начальная дата была раньше или равна конечной
         if (start > end) {
             [start, end] = [end, start];
         }
 
-        // Проходим по всем месяцам между начальной и конечной датой включительно
         while (start.getFullYear() < end.getFullYear() || (start.getFullYear() === end.getFullYear() && start.getMonth() <= end.getMonth())) {
-            result.push([start.getMonth() + 1, start.getFullYear()]); // Добавляем месяц и год в массив
-            start.setMonth(start.getMonth() + 1); // Переходим к следующему месяцу
+            result.push([start.getMonth() + 1, start.getFullYear()]);
+            start.setMonth(start.getMonth() + 1);
         }
 
         return result;
     }
-    
+
     getDateObjects(gridMonths) {
         return gridMonths.map(([month, year]) => ({
             month,
@@ -1013,7 +1009,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
             $(this.gridLayoutMonthsElement).append(monthHeader);
             let daysHeader = $('<div>').addClass('header-container__item col');
             let daysRow = $('<div>').addClass('row');
-            for (let i=1; i <= monthObj.days; i++) {
+            for (let i = 1; i <= monthObj.days; i++) {
                 let daysItem = $('<div>').addClass('header-container__item col').text(i);
                 $(daysRow).append(daysItem);
                 $(daysHeader).append(daysRow);
@@ -1022,22 +1018,49 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         }
     }
 
-    calculateItemPosition(dateObject, startDate, endDate, itemWidth) {
-        const startMonthIndex = dateObject.findIndex(obj => obj.month === startDate.getMonth() + 1 && obj.year === startDate.getFullYear());
-        const endMonthIndex = dateObject.findIndex(obj => obj.month === endDate.getMonth() + 1 && obj.year === endDate.getFullYear());
-
-        const startOffset = this.calculateDateOffset(dateObject, startMonthIndex, startDate.getDate() - 1);
-        const endOffset = this.calculateDateOffset(dateObject, endMonthIndex, endDate.getDate() - 1);
-
-        const totalDays = endOffset - startOffset + 1;
-        const width = totalDays * itemWidth;
-        const leftPosition = startOffset * itemWidth;
-
-        return [width, leftPosition];
+    setWeekCalendarGrid(dateObject) {
+        for (let monthObj of dateObject) {
+            let monthHeader = $('<div>').addClass('header-container__item col').text(`${this.months[monthObj.month-1]} ${monthObj.year}`);
+            $(this.gridLayoutMonthsElement).append(monthHeader);
+            let weeksHeader = $('<div>').addClass('header-container__item col');
+            let weeksRow = $('<div>').addClass('row');
+            const weeks = Math.ceil(monthObj.days / 7);
+            for (let i = 1; i <= weeks; i++) {
+                let weeksItem = $('<div>').addClass('header-container__item col').text(`Week ${i}`);
+                $(weeksRow).append(weeksItem);
+                $(weeksHeader).append(weeksRow);
+            }
+            $(this.gridLayoutDaysElement).append(weeksHeader);
+        }
     }
 
-    calculateDateOffset(dateObject, monthIndex, dayOffset) {
-        return dateObject.slice(0, monthIndex).reduce((sum, obj) => sum + obj.days, 0) + dayOffset;
+    setMonthCalendarGrid(dateObject) {
+        dateObject.forEach(monthObj => {
+            let monthHeader = $('<div>').addClass('header-container__item col').text(`${this.months[monthObj.month - 1]} ${monthObj.year}`);
+            $(this.gridLayoutMonthsElement).append(monthHeader);
+        });
+    }
+
+    setGridLayout(data, tasks, dateObject) {
+        this.emptyAll();
+        let itemWidth = 29;
+        let widthFactor = this.viewMode === 'weeks' ? 4 : this.viewMode === 'months' ? 1 : 1;
+        this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * itemWidth / widthFactor}px` });
+
+        if (this.viewMode === 'days') {
+            this.setCalendarGrid(dateObject);
+        } else if (this.viewMode === 'weeks') {
+            this.setWeekCalendarGrid(dateObject);
+        } else if (this.viewMode === 'months') {
+            this.setMonthCalendarGrid(dateObject);
+        }
+
+        tasks.forEach((task) => {
+            const abbreviatedNewTaskLoader = new AbbreviatedNewTaskLoader(data, task, dateObject, this.viewMode);
+            abbreviatedNewTaskLoader.eventHandler();
+        });
+
+        this.setProjectBorders(tasks, dateObject);
     }
 
     setProjectBorders(tasks, dateObject) {
@@ -1067,21 +1090,25 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         }
     }
 
-    setGridLayout(data, tasks, dateObject) {
-        this.emptyAll();
-        let itemWidth = 29;
-        this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * itemWidth}px` });
-        this.setCalendarGrid(dateObject);
+    calculateItemPosition(dateObject, startDate, endDate, itemWidth) {
+        const startMonthIndex = dateObject.findIndex(obj => obj.month === startDate.getMonth() + 1 && obj.year === startDate.getFullYear());
+        const endMonthIndex = dateObject.findIndex(obj => obj.month === endDate.getMonth() + 1 && obj.year === endDate.getFullYear());
 
-        tasks.forEach((task) => {
-            const abbreviatedNewTaskLoader = new AbbreviatedNewTaskLoader(data, task, dateObject);
-            abbreviatedNewTaskLoader.eventHandler();
-        });
+        const startOffset = this.calculateDateOffset(dateObject, startMonthIndex, startDate.getDate() - 1);
+        const endOffset = this.calculateDateOffset(dateObject, endMonthIndex, endDate.getDate() - 1);
 
-        this.setProjectBorders(tasks, dateObject);
+        const totalDays = endOffset - startOffset + 1;
+        const width = totalDays * itemWidth;
+        const leftPosition = startOffset * itemWidth;
+
+        return [width, leftPosition];
     }
 
+    calculateDateOffset(dateObject, monthIndex, dayOffset) {
+        return dateObject.slice(0, monthIndex).reduce((sum, obj) => sum + obj.days, 0) + dayOffset;
+    }
 }
+
 
 class DropdownEditableEventHandler extends BaseAbbreviatedEventHandler {
     constructor() {
@@ -1232,7 +1259,7 @@ export class AbbreviatedProjectLoader extends BaseAbbreviatedEventHandler {
         this.projectNameLoader = new AbbreviatedProjectNameLoader(projectId);
         this.projectStatusLoader = new AbbreviatedProjectStatusLoader(projectId);
         this.projectRoleLoader = new AbbreviatedProjectRoleLoader(projectId);
-        this.gridLayoutLoader = new GridLayoutTaskLoader(projectId);
+        this.gridLayoutLoader = new GridLayoutTaskLoader(projectId, 'months');
         //members tab
         this.membersLoader = new MembersLoader();
         this.editableEventHandler = new EditableEventHandler();
