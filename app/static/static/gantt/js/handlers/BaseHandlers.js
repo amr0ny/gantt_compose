@@ -2,19 +2,14 @@ export function mixin(BaseClass, ...Mixins) {
     class Mixed extends BaseClass {
         constructor(...args) {
             super(...args);
-            Mixins.forEach(Mixin => {
-                Object.assign(this, new Mixin(...args));
-            });
+            Mixins.forEach(Mixin => Object.assign(this, new Mixin(...args)));
         }
     }
 
-    Mixins.forEach(Mixin => {
-        Object.assign(Mixed.prototype, Mixin.prototype);
-    });
+    Mixins.forEach(Mixin => Object.assign(Mixed.prototype, Mixin.prototype));
 
     return Mixed;
 }
-
 
 export class BaseHandler {
     constructor(selector, e) {
@@ -31,9 +26,8 @@ export class BaseHandler {
 
     parseJsonContext() {
         try {
-            var jsonContext = JSON.parse(this.jsonContextElement.text());
-            if (jsonContext.length === 0)
-                throw new Error('Context is empty.');
+            const jsonContext = JSON.parse(this.jsonContextElement.text());
+            if (jsonContext.length === 0) throw new Error('Context is empty.');
             return jsonContext;
         } catch (err) {
             console.error(`App context is unavailable: ${err}`);
@@ -41,20 +35,22 @@ export class BaseHandler {
     }
 
     setJsonContext(updates) {
-        var scriptElement = $('#context-data');
+        const scriptElement = $('#context-data');
         if (scriptElement.length === 0) {
             console.error('Element with id "context-data" not found.');
             return;
         }
-        var contextData;
+
+        let contextData;
         try {
             contextData = JSON.parse(scriptElement.text());
         } catch (e) {
             console.error('Error parsing JSON content:', e);
             return;
         }
+
         $.extend(true, contextData, updates);
-        var updatedJson = JSON.stringify(contextData);
+        const updatedJson = JSON.stringify(contextData);
         scriptElement.text(updatedJson);
     }
 
@@ -77,17 +73,15 @@ export class BaseHandler {
     }
 }
 
-
 export class BaseDefaultEventHandler extends BaseHandler {
     constructor(selector, e) {
         super(selector, e);
     }
 
     _setupEventHandler() {
-        var self = this;
-        $(this.element).on(this.e, (event) => {
-            event = self.assignEvent(event);
-            self.eventHandler(event);
+        $(this.element).on(this.e, event => {
+            event = this.assignEvent(event);
+            this.eventHandler(event);
         });
     }
 
@@ -98,11 +92,10 @@ export class BaseDefaultEventHandler extends BaseHandler {
 }
 
 export class BaseRequestEventHandler extends BaseHandler {
-    constructor(selector, e, type, endpoint=undefined) {
+    constructor(selector, e, type, endpoint = undefined) {
         super(selector, e);
         this.type = type;
         this.endpoint = endpoint;
-        
     }
 
     _setupEventHandler() {
@@ -113,26 +106,20 @@ export class BaseRequestEventHandler extends BaseHandler {
             const data = this.serializeData(context);
             const args = this._getArgs(data);
             this.endpoint = this.getEndpoint(event);
-            this.request(args).then((res) => {
-                this.eventHandler(res, event);
-            }).catch((error) => {
-                console.error("Request failed:", error);
-            });
+            this.request(args)
+                .then(res => this.eventHandler(res, event))
+                .catch(error => console.error("Request failed:", error));
         });
     }
 
-    async request(args={}) {
+    async request(args = {}) {
         const csrftoken = this.getCSRFToken();
         return new Promise((resolve, reject) => {
             $.ajax({
                 type: this.type,
                 url: this.endpoint,
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                },
-                success: (res) => {
-                    resolve(res);
-                },
+                beforeSend: xhr => xhr.setRequestHeader("X-CSRFToken", csrftoken),
+                success: res => resolve(res),
                 error: (xhr, textStatus, errorThrown) => {
                     this.error(xhr, textStatus, errorThrown);
                     reject(new Error(textStatus));
@@ -143,8 +130,7 @@ export class BaseRequestEventHandler extends BaseHandler {
     }
 
     getEndpoint(event) {
-        if (this.endpoint === undefined)
-            throw new Error('Endpoint must be defined');
+        if (this.endpoint === undefined) throw new Error('Endpoint must be defined');
         return this.endpoint;
     }
 
@@ -172,9 +158,7 @@ export class BaseRequestEventHandler extends BaseHandler {
     }
 
     _getArgs(data) {
-        var args = this.__getArgs();
-        args['data'] = data;
-        return args;
+        return { ...this.__getArgs(), data };
     }
 
     __getArgs() {
@@ -194,23 +178,21 @@ export class BaseRequestEventHandler extends BaseHandler {
     }
 }
 
-//! Change to new signature
 export class BaseGETEventHandler extends BaseRequestEventHandler {
-    
     constructor(selector, e, endpoint = undefined) {
         super(selector, e, 'GET', endpoint);
     }
 
-    __getArgs() {
-        var args = {
-            dataType: 'JSON',
-        }
-        return args;
-    }
-    
     _getArgs(data) {
         return this.__getArgs();
     }
+
+    __getArgs() {
+        return {
+            dataType: 'JSON',
+        };
+    }
+
     getContextData(event) {
         return;
     }
@@ -218,25 +200,21 @@ export class BaseGETEventHandler extends BaseRequestEventHandler {
     serializeData(context) {
         return;
     }
-}    
-
+}
+   
 export class BasePOSTEventHandler extends BaseRequestEventHandler {
     constructor(selector, e, endpoint = undefined) {
-        super(selector, e, 'POST', endpoint);  // Вызываем конструктор базового класса с типом запроса 'POST'
+        super(selector, e, 'POST', endpoint);
     }
 
     serializeData(context) {
         const formData = new FormData();
-        for (let key in context) {
+        for (const key in context) {
             if (context.hasOwnProperty(key)) {
                 formData.append(key, context[key]);
             }
         }
-        let isEmpty = true;
-        for (let _pair of formData.entries()) {
-            isEmpty = false;
-            break;
-        }
+        const isEmpty = !formData.entries().next().done;
         if (isEmpty) {
             throw new Error('FormData is empty.');
         }
@@ -245,7 +223,7 @@ export class BasePOSTEventHandler extends BaseRequestEventHandler {
 
     __getArgs() {
         return {
-            contentType: false,  // Не указываем тип контента, чтобы позволить jQuery корректно обработать FormData
+            contentType: false,
             processData: false,
             timeout: 5000,
         };
@@ -257,11 +235,11 @@ export class BaseDLTEventHandler extends BaseRequestEventHandler {
         super(selector, e, 'DELETE', endpoint);
     }
 
-    serializeData(context) {
+    serializeData() {
         return;
     }
 
-    getContextData(event) {
+    getContextData() {
         return;
     }
 
@@ -286,33 +264,31 @@ export class BasePATCHEventHandler extends BaseRequestEventHandler {
 
     serializeData(context) {
         const formData = new FormData();
-        for (let key in context) {
+        for (const key in context) {
             if (context.hasOwnProperty(key)) {
                 formData.append(key, context[key]);
             }
         }
-        if (!formData.entries().next().done) {
+        const isEmpty = !formData.entries().next().done;
+        if (isEmpty) {
             throw new Error('FormData is empty.');
         }
         return formData;
     }
 }
 
-
-
 export class BaseDocumentEventHandler extends BaseHandler {
     constructor(e) {
-        var selector = document;
+        const selector = document;
         super(selector, e);
     }
 
     _setupEventHandler() {
-        $(selector).on(this.e, event => {
+        $(this.selector).on(this.e, event => {
             this.eventHandler(event);
         });
     }
 }
-
 
 export class BaseFormEventHandler extends BasePOSTEventHandler {
     constructor(selector, endpoint) {
@@ -326,12 +302,8 @@ export class BaseFormEventHandler extends BasePOSTEventHandler {
     }
 
     serializeData(context) {
-        var formData = context;
-        let isEmpty = true;
-        for (let pair of formData.entries()) {
-            isEmpty = false;
-            break;
-        }
+        const formData = context;
+        const isEmpty = !formData.entries().next().done;
         if (isEmpty) {
             throw new Error('FormData is empty.');
         }
@@ -347,15 +319,14 @@ export class BaseFormEventHandler extends BasePOSTEventHandler {
     }
 }
 
-
 export class BaseDocumentReadyHandler extends BaseDocumentEventHandler {
     constructor() {
         super('ready');
     }
 
     _setupEventHandler() {
-        var self = this;
-        $(this.element).ready((event) => {
+        const self = this;
+        $(this.selector).ready(event => {
             self.eventHandler();
         });
     }
@@ -396,10 +367,10 @@ export class BaseAbbreviatedRequestEventHandler extends mixin(BaseRequestEventHa
             const data = this.serializeData(context);
             const args = this._getArgs(data);
             this.endpoint = this.getEndpoint();
-            this.request(args).then((res) => {
+            this.request(args).then(res => {
                 this.success(res);
                 resolve();
-            }).catch((error) => {
+            }).catch(error => {
                 console.error("Request failed:", error);
                 reject();
             });
@@ -410,8 +381,6 @@ export class BaseAbbreviatedRequestEventHandler extends mixin(BaseRequestEventHa
         throw new Error('Abstract method must be implemented.');
     }
 }
-
-
 
 export class BaseAbbreviatedPOSTEventHandler extends BaseAbbreviatedRequestEventHandler {
     constructor(endpoint = undefined) {

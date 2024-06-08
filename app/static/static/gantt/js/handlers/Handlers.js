@@ -4,7 +4,6 @@ import 'https://cdn.interactjs.io/v1.9.20/actions/resize/index.js'
 import 'https://cdn.interactjs.io/v1.9.20/modifiers/index.js'
 import 'https://cdn.interactjs.io/v1.9.20/dev-tools/index.js'
 import interact from 'https://cdn.interactjs.io/v1.9.20/interactjs/index.js'
-
 import {
     BaseHandler,
     BaseAbbreviatedEventHandler,
@@ -23,8 +22,8 @@ import {
 
 export class DocumentReadyContentLoader extends BaseDocumentReadyHandler {
     eventHandler() {
-        var jsonContext = this.parseJsonContext();
-        var projectId = jsonContext.project.id;
+        const jsonContext = this.parseJsonContext();
+        const projectId = jsonContext.project.id;
         if (!projectId) {
             $.ajax({
                 url: '/api/v1/projects/?fields=id',
@@ -42,14 +41,13 @@ export class DocumentReadyContentLoader extends BaseDocumentReadyHandler {
                     console.error(data);
                 }
             });
-        }
-        else {
+        } else {
             $.ajax({
                 url: `/api/v1/projects/${projectId}/`,
                 type: 'GET',
                 dataType: 'JSON',
                 success: (data) => {
-                    var abbreviatedProjectLoader = new AbbreviatedProjectLoader(jsonContext.project.id);
+                    const abbreviatedProjectLoader = new AbbreviatedProjectLoader(jsonContext.project.id);
                     abbreviatedProjectLoader.eventHandler(data);
                 },
                 error: (data) => {
@@ -62,14 +60,14 @@ export class DocumentReadyContentLoader extends BaseDocumentReadyHandler {
 
 export class SyncScrollableEventHandler extends BaseDefaultEventHandler {
     constructor() {
-        var selector = '.js-sync-scrollable'
+        const selector = '.js-sync-scrollable';
         super(selector, 'scroll');
         this.scrollElements = $(selector);
         this.scrollElements.off(this.e);
     }
 
     eventHandler(event) {
-        $(this.scrollElements).not(event.target).each(function() {
+        $(this.scrollElements).not(event.target).each(function () {
             $(this).scrollTop($(event.target).scrollTop()).scrollLeft($(event.target).scrollLeft());
         });
     }
@@ -88,11 +86,10 @@ export class ModalBackgroundEventHandler extends BaseDefaultEventHandler {
         return new ModalBackgroundEventHandler('hide.bs.modal');
     }
 
-
-    eventHandler = function(event) {
-    const action = event.type === 'show.bs.modal' ? 'addClass' : 'removeClass';
-    $('.js-main-container')[action]('blur-background');
-};
+    eventHandler(event) {
+        const action = event.type === 'show.bs.modal' ? 'addClass' : 'removeClass';
+        $('.js-main-container')[action]('blur-background');
+    }
 }
 
 export class CreateProjectModalShowUpHandler extends BaseDefaultEventHandler {
@@ -128,7 +125,6 @@ export class AddTaskModalShowUpEventHandler extends BaseDefaultEventHandler {
         super('.js-add-task', 'click');
     }
 
-    // Event handler method
     eventHandler(_event) {
         $('#modal-create-task').modal();
     }
@@ -146,8 +142,8 @@ export class AddMilestoneShowUpEventHandler extends BaseDefaultEventHandler {
 
 export class CreateProjectEventHandler extends BaseFormEventHandler {
     constructor() {
-        var selector = '.js-form-project';
-        let endpoint = `/api/v1/projects/`;
+        const selector = '.js-form-project';
+        const endpoint = '/api/v1/projects/';
         super(selector, endpoint);
     }
 
@@ -160,31 +156,31 @@ export class CreateProjectEventHandler extends BaseFormEventHandler {
 
 export class AddTaskEventHandler extends BaseFormEventHandler {
     constructor() {
-        var selector = '.js-form-task';
+        const selector = '.js-form-task';
         super(selector);
     }
 
     getEndpoint(event) {
         const jsonContext = this.parseJsonContext();
         const projectId = jsonContext.project.id;
-        const endpoint = `/api/v1/projects/${projectId}/tasks/`;
-        return endpoint;
+        return `/api/v1/projects/${projectId}/tasks/`;
     }
 
     getColor() {
         const randomColorValue = () => Math.floor(127 + Math.random() * 128).toString(16).padStart(2, '0');
         return `#${randomColorValue()}${randomColorValue()}${randomColorValue()}`;
     }
+
     getContextData(event) {
-        var context = super.getContextData(event);
+        const context = super.getContextData(event);
         context.append('color', this.getColor());
         return context;
     }
 
     serializeData(context) {
-        var formData = context;
+        const formData = context;
         let isEmpty = true;
-        for (let _pair of formData.entries()) {
+        for (const _pair of formData.entries()) {
             isEmpty = false;
             break;
         }
@@ -192,7 +188,7 @@ export class AddTaskEventHandler extends BaseFormEventHandler {
             throw new Error('FormData is empty.');
         }
 
-        if (formData.get('type') == 'milestone') {
+        if (formData.get('type') === 'milestone') {
             formData.append('end_datetime', formData.get('start_datetime'));
         }
 
@@ -202,12 +198,12 @@ export class AddTaskEventHandler extends BaseFormEventHandler {
     eventHandler(data) {
         const jsonContext = this.parseJsonContext();
         const projectId = jsonContext.project.id;
-        var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
-        var editableEventHandler = new EditableEventHandler();
-        var dropdownEditableEventHandler = new DropdownEditableEventHandler();
-        var assigneesEventHandler = new TaskAssigneesEventHandler();
-        var datetimeEventHandler = new TaskDatetimeEventHandler();
-        var removeTaskEventHandler = new RemoveTaskEventHandler();
+        const gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+        const editableEventHandler = new EditableEventHandler();
+        const dropdownEditableEventHandler = new DropdownEditableEventHandler();
+        const assigneesEventHandler = new TaskAssigneesEventHandler();
+        const datetimeEventHandler = new TaskDatetimeEventHandler();
+        const removeTaskEventHandler = new RemoveTaskEventHandler();
         gridLayoutTaskLoader.eventHandler();
         $('#modal-create-task').modal('hide');
     }
@@ -215,7 +211,7 @@ export class AddTaskEventHandler extends BaseFormEventHandler {
 
 export class AddMemberEventHandler extends BaseFormEventHandler {
     constructor() {
-        var selector = '.js-form-member';
+        const selector = '.js-form-member';
         super(selector);
     }
 
@@ -226,7 +222,7 @@ export class AddMemberEventHandler extends BaseFormEventHandler {
     }
 
     eventHandler(data) {
-        var abbreviatedNewMemberLoader = new AbbreviatedNewMemberLoader(data);
+        const abbreviatedNewMemberLoader = new AbbreviatedNewMemberLoader(data);
         abbreviatedNewMemberLoader.eventHandler();
     }
 }
@@ -242,22 +238,21 @@ export class AbbreviatedContextDataUpdater extends BaseAbbreviatedPOSTEventHandl
 
     __getArgs() {
         return {
-            contentType: "application/json; charset=UTF-8",
-            dataType: "JSON",
+            contentType: 'application/json; charset=UTF-8',
+            dataType: 'JSON',
             processData: false,
-        }
+        };
     }
 
     getEndpoint() {
-        var endpoint = '/api/v1/context/';
-        return endpoint;
+        return '/api/v1/context/';
     }
 
     success(res) {
         this.setJsonContext(res);
     }
 }
-/// TODO Add RemoveTaskEventHandler
+
 export class RemoveMemberEventHandler extends BaseDLTEventHandler {
     constructor(element) {
         super('', 'click');
@@ -265,50 +260,46 @@ export class RemoveMemberEventHandler extends BaseDLTEventHandler {
     }
 
     _getElement() {
-        return; 
+        return;
     }
+
     assignEvent(event) {
         return event;
     }
 
     getEndpoint(event) {
-        var target = event.target.closest('.js-member');
-        var memeberId = $(target).attr('data-member-id');
-        let jsonContext = this.parseJsonContext();
-        var projectId = jsonContext.project.id;
-        var endpoint = `/api/v1/projects/${projectId}/members/${memeberId}/`;
-        return endpoint;
+        const target = event.target.closest('.js-member');
+        const memberId = $(target).attr('data-member-id');
+        const jsonContext = this.parseJsonContext();
+        const projectId = jsonContext.project.id;
+        return `/api/v1/projects/${projectId}/members/${memberId}/`;
     }
 
-    
     eventHandler() {
-        var membersLoader = new MembersLoader();
+        const membersLoader = new MembersLoader();
         membersLoader.eventHandler();
     }
-
 }
 
 export class RemoveTaskEventHandler extends BaseDLTEventHandler {
     constructor() {
-        let selector = '.js-task-col-remove';
+        const selector = '.js-task-col-remove';
         super(selector, 'click');
     }
 
     getEndpoint(event) {
-        var taskId = $(event.target).attr('data-task-id');
-        let jsonContext = this.parseJsonContext();
-        var projectId = jsonContext.project.id;
-        var endpoint = `/api/v1/projects/${projectId}/tasks/${taskId}/`;
-        return endpoint;
+        const taskId = $(event.target).attr('data-task-id');
+        const jsonContext = this.parseJsonContext();
+        const projectId = jsonContext.project.id;
+        return `/api/v1/projects/${projectId}/tasks/${taskId}/`;
     }
 
     eventHandler() {
         const jsonContext = this.parseJsonContext();
         const projectId = jsonContext.project.id;
-        var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+        const gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
         gridLayoutTaskLoader.eventHandler();
     }
-
 }
 
 export class DocumentClickHandler {
@@ -320,7 +311,7 @@ export class DocumentClickHandler {
     setupDocumentClickEventHandler(callback) {
         if (!this.documentClickHandlerOn) {
             this.documentClickHandlerOn = true;
-            $(document).on('click', event => {
+            $(document).on('click', (event) => {
                 if (this.currentEditingElement && !$.contains(this.currentEditingElement[0], event.target)) {
                     callback(this.currentEditingElement);
                     this.currentEditingElement = null;
@@ -337,6 +328,7 @@ export class DocumentClickHandler {
         return this.currentEditingElement;
     }
 }
+
 export class EditablePATCHEventHandler extends BaseAbbreviatedPATCHEventHandler {
     constructor(endpoint = undefined) {
         super(endpoint);
@@ -347,7 +339,7 @@ export class EditablePATCHEventHandler extends BaseAbbreviatedPATCHEventHandler 
         element.attr('contenteditable', 'false').removeClass('editing');
         this.endpoint = this.getEndpoint(element);
         const data = this.serializeData(element);
-        var args = this._getArgs(data);
+        const args = this._getArgs(data);
         this.request(args).then((res) => this.success(res, element));
     }
 
@@ -371,32 +363,29 @@ export class EditablePATCHEventHandler extends BaseAbbreviatedPATCHEventHandler 
         const data = {};
         const formData = new FormData();
         data[$(element).attr(this.dataFieldName)] = $(element).text();
-        for (let key in data) {
+        for (const key in data) {
             if (data.hasOwnProperty(key)) {
                 formData.append(key, data[key]);
             }
         }
-        for (let pair of formData.entries()) {
-        }
         return formData;
     }
-    
+
     success(data, element) {
         const jsonContext = this.parseJsonContext();
         const projectId = jsonContext.project.id;
         if ($(element).attr('data-entity') === 'project') {
-            var abbreviatedProjectNameLoader = new AbbreviatedProjectNameLoader(projectId);
+            const abbreviatedProjectNameLoader = new AbbreviatedProjectNameLoader(projectId);
             abbreviatedProjectNameLoader.eventHandler();
-        }
-        else {
-            var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+        } else {
+            const gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
             gridLayoutTaskLoader.eventHandler();
         }
     }
 }
 
 
-export class EditableEventHandler extends BaseAbbreviatedEventHandler {
+class EditableEventHandler extends BaseAbbreviatedEventHandler {
     constructor() {
         super();
         this.dataFieldName = 'data-field';
@@ -409,13 +398,13 @@ export class EditableEventHandler extends BaseAbbreviatedEventHandler {
             this.editablePATCHEventHandler.eventHandler(element);
         });
 
-        const editableElement = $('.js-editable');
-        $(editableElement).off('click');
-        $(editableElement).on('click', event => {
+        const editableElements = $('.js-editable');
+        editableElements.off('click');
+        editableElements.on('click', event => {
             const target = event.target;
             event.stopPropagation();
 
-            if (this.documentClickHandler.getCurrentEditingElement() && 
+            if (this.documentClickHandler.getCurrentEditingElement() &&
                 this.documentClickHandler.getCurrentEditingElement()[0] !== target) {
                 this.editablePATCHEventHandler.saveAndDisableEditing(this.documentClickHandler.getCurrentEditingElement());
             }
@@ -424,15 +413,14 @@ export class EditableEventHandler extends BaseAbbreviatedEventHandler {
             this.documentClickHandler.setCurrentEditingElement($(target));
 
             const range = document.createRange();
-            const sel = window.getSelection();
+            const selection = window.getSelection();
             range.selectNodeContents(target);
             range.collapse(false);
-            sel.removeAllRanges();
-            sel.addRange(range);
+            selection.removeAllRanges();
+            selection.addRange(range);
         });
     }
 }
-
 
 class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
     constructor(data, task, dateObject) {
@@ -455,7 +443,6 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
         const jsonContext = this.parseJsonContext();
         this.statuses = jsonContext.content.task_statuses || {};
     }
-
 
     calculateItemPosition(startDate, endDate, itemWidth) {
         const startOffset = this.calculateOffset(startDate);
@@ -502,7 +489,7 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
         const task = this.task;
         const tableRow = this.createElement('div', ['chart-table__task-row', 'task-row'], { 'data-task-id': task.id });
         const tableRemoveCol = this.createElement('div', ['col-md-1', 'js-task-col-remove'], { 'data-task-id': task.id, 'data-entity': 'task' });
-        const tableTaskCol = this.createElement('div', ['table-row__item', 'col-md-3', 'js-task-col-name', ], { 'data-entity-id': task.id, 'data-field': 'name', 'data-entity': 'task' }, undefined);
+        const tableTaskCol = this.createElement('div', ['table-row__item', 'col-md-3', 'js-task-col-name'], { 'data-entity-id': task.id, 'data-field': 'name', 'data-entity': 'task' });
         const tableAssigneeCol = this.createElement('div', ['table-row__item', 'col-md-3', 'js-task-col-assignee']);
         const tableStatusCol = this.createElement('div', ['table-row__item', 'col', 'js-task-col-status', 'js-dropdown-field']);
         const tableStartDateCol = this.createElement('div', ['table-row__item', 'col', 'js-task-col-start-datetime']);
@@ -513,9 +500,9 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
         this.renderAssigneeColumn(tableAssigneeCol, task);
         this.renderStatusColumn(tableStatusCol, task);
         this.renderStartDatetimeColumn(tableStartDateCol, task);
+
         if (task.type === 'task') {
             this.renderEndDatetimeColumn(tableEndDateCol, task);
-        } else if (task.type === 'milestone') {
         }
 
         tableRow.append(tableRemoveCol, tableTaskCol, tableAssigneeCol, tableStatusCol, tableStartDateCol, tableEndDateCol);
@@ -531,18 +518,14 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
         const tableName = this.createElement('div', ['task-row__text-container', 'js-editable'], { 'data-entity-id': task.id, 'data-field': 'name', 'data-entity': 'task' }, task.name);
         column.append(tableName);
     }
+
     renderAssigneeColumn(column, task) {
         const tableAssigneeDropdownContainer = this.createElement('div', ['dropdown']);
         const tableAssigneeContainer = this.createElement('div', ['table-assignees-container'], { 'data-toggle': 'dropdown' });
         const assigneeDropdown = this.createElement('div', ['dropdown-menu', 'js-editable-dropdown', 'dropdown-menu-assignee']);
         const tableAssigneeHeader = this.createElement('dt', [], [], 'Участники проекта');
         const tableHr = this.createElement('hr');
-        const confirmButton = this.createElement('input', ['btn', 'btn-primary', 'btn-sm'], {type: 'submit', value: 'Выбрать'});
-
-        const assigneePills = [];
-        task.assignees.forEach(item => {
-            assigneePills.push(this.createElement('span', ['badge', 'badge-secondary', 'badge-pill'], {}, `${item.first_name} ${item.last_name}`));
-        });
+        const confirmButton = this.createElement('input', ['btn', 'btn-primary', 'btn-sm'], { type: 'submit', value: 'Выбрать' });
 
         const createAssigneePills = (assignees) => {
             return new Promise((resolve, reject) => {
@@ -559,25 +542,29 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
 
         const teamMembersElements = this.data.members.map(item => {
             const formGroup = this.createElement('div', ['form-group']);
-            const input = this.createElement('input', [], { 'type': 'checkbox', 'name': 'id', 'value': item.person.id, 'id': `task-member-${task.id}-${item.person.id}`,}).prop('checked', this.task.assignees.some(assignee => assignee.id === item.person.id));
+            const input = this.createElement('input', [], { 'type': 'checkbox', 'name': 'id', 'value': item.person.id, 'id': `task-member-${task.id}-${item.person.id}` }).prop('checked', this.task.assignees.some(assignee => assignee.id === item.person.id));
             const label = this.createElement('label', [], { 'for': `task-member-${task.id}-${item.person.id}` }, `${item.person.first_name} ${item.person.last_name}`);
             formGroup.append(input, label);
             return formGroup;
         });
 
         const assigneeFormWrapper = this.createElement('div', ['assignee-form-container']);
-        const assigneesForm = this.createElement('form', ['js-assignee-form', 'assignee-form', 'd-flex', 'flex-column'], {'data-task-id': task.id});
+        const assigneesForm = this.createElement('form', ['js-assignee-form', 'assignee-form', 'd-flex', 'flex-column'], { 'data-task-id': task.id });
         assigneeFormWrapper.append(teamMembersElements);
         assigneesForm.append(assigneeFormWrapper, confirmButton);
         assigneeDropdown.append(tableAssigneeHeader, tableHr, assigneesForm);
-        createAssigneePills(task.assignees).then(assigneePills => {
-            tableAssigneeContainer.append(...assigneePills);
-            if (task.assignees.length === 0) {
-                tableAssigneeContainer.text('Не назначен');
-            }
-        }).catch(error => {
-            console.error('Ошибка при создании Assignee Pills:', error);
-        });
+        
+        createAssigneePills(task.assignees)
+            .then(assigneePills => {
+                tableAssigneeContainer.append(...assigneePills);
+                if (task.assignees.length === 0) {
+                    tableAssigneeContainer.text('Не назначен');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при создании Assignee Pills:', error);
+            });
+        
         tableAssigneeDropdownContainer.append(tableAssigneeContainer, assigneeDropdown);
         column.append(tableAssigneeDropdownContainer);
     }
@@ -618,15 +605,16 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
     
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
+
     renderStartDatetimeColumn(column, task) {
         const tableDropdownContainer = this.createElement('div', ['dropdown']);
         const value = this.formatDateToInputValue(new Date(task.start_datetime));
-        const tableStartDatetime = this.createElement('div', [],  {'data-toggle': 'dropdown' }, value.split('T')[0]);
+        const tableStartDatetime = this.createElement('div', [], { 'data-toggle': 'dropdown' }, value.split('T')[0]);
         const datetimeDropdown = this.createElement('div', ['dropdown-menu', 'js-editable-dropdown', 'dropdown-menu-datetime']);
 
-        const datetimeForm = this.createElement('form', ['js-datetime-form', 'd-flex'], { 'data-task-id': task.id});
-        const datetimeInputDatetime = this.createElement('input', ['form-control'], {'type':'datetime-local', 'value': value, 'name': 'start_datetime'});
-        const confirmButton = this.createElement('input', ['btn', 'btn-primary', 'btn-sm'], {type: 'submit', value: 'Выбрать'});
+        const datetimeForm = this.createElement('form', ['js-datetime-form', 'd-flex'], { 'data-task-id': task.id });
+        const datetimeInputDatetime = this.createElement('input', ['form-control'], { 'type': 'datetime-local', 'value': value, 'name': 'start_datetime' });
+        const confirmButton = this.createElement('input', ['btn', 'btn-primary', 'btn-sm'], { type: 'submit', value: 'Выбрать' });
 
         datetimeForm.append(datetimeInputDatetime, confirmButton);
         datetimeDropdown.append(datetimeForm);
@@ -641,9 +629,9 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
 
         const datetimeDropdown = this.createElement('div', ['dropdown-menu', 'dropdown-menu-datetime']);
 
-        const datetimeForm = this.createElement('form', ['js-datetime-form', 'd-flex'], { 'data-task-id': task.id});
-        const datetimeInputDatetime = this.createElement('input', ['form-control'], {'type':'datetime-local', 'value': value, 'name':'end_datetime'});
-        const confirmButton = this.createElement('input', ['btn', 'btn-primary', 'btn-sm'], {type: 'submit', value: 'Выбрать'});
+        const datetimeForm = this.createElement('form', ['js-datetime-form', 'd-flex'], { 'data-task-id': task.id });
+        const datetimeInputDatetime = this.createElement('input', ['form-control'], { 'type': 'datetime-local', 'value': value, 'name': 'end_datetime' });
+        const confirmButton = this.createElement('input', ['btn', 'btn-primary', 'btn-sm'], { type: 'submit', value: 'Выбрать' });
 
         datetimeForm.append(datetimeInputDatetime, confirmButton);
         datetimeDropdown.append(datetimeForm);
@@ -711,10 +699,9 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
     }
 }
 
-
 export class TaskAssigneesEventHandler extends BasePATCHEventHandler {
     constructor() {
-        var selector = '.js-assignee-form';
+        const selector = '.js-assignee-form';
         super(selector, 'submit');
     }
 
@@ -722,41 +709,32 @@ export class TaskAssigneesEventHandler extends BasePATCHEventHandler {
         const jsonContext = this.parseJsonContext();
         const projectId = jsonContext.project.id;
         const taskId = $(event.target).attr('data-task-id');
-        const endpoint = `/api/v1/projects/${projectId}/tasks/${taskId}/`;
-        return endpoint;
+        return `/api/v1/projects/${projectId}/tasks/${taskId}/`;
     }
 
     getContextData(event) {
         const target = event.target;
-        const formData = new FormData(target);
-        return formData;
+        return new FormData(target);
     }
 
     serializeData(context) {
-        let data = { assignees: [] };
-        let assignees = [];
-        for (let pair of context.entries()) {
-            assignees.push(Number(pair[1]));
-        }
-        data.assignees = assignees;
-        return JSON.stringify(data);
-
+        const assignees = Array.from(context.entries()).map(([, value]) => Number(value));
+        return JSON.stringify({ assignees });
     }
 
     eventHandler(res, event) {
-        var target = event.target.closest('.dropdown-menu');
+        const target = event.target.closest('.dropdown-menu');
         $(target).dropdown('toggle');
         const jsonContext = this.parseJsonContext();
         const projectId = jsonContext.project.id;
-        var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+        const gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
         gridLayoutTaskLoader.eventHandler();
     }
 }
-
 
 export class TaskDatetimeEventHandler extends BasePATCHEventHandler {
     constructor() {
-        var selector = '.js-datetime-form';
+        const selector = '.js-datetime-form';
         super(selector, 'submit');
     }
 
@@ -764,35 +742,30 @@ export class TaskDatetimeEventHandler extends BasePATCHEventHandler {
         const jsonContext = this.parseJsonContext();
         const projectId = jsonContext.project.id;
         const taskId = $(event.target).attr('data-task-id');
-        const endpoint = `/api/v1/projects/${projectId}/tasks/${taskId}/`;
-        return endpoint;
+        return `/api/v1/projects/${projectId}/tasks/${taskId}/`;
     }
 
     getContextData(event) {
-        const target = event.target;
-        const formData = new FormData(target);
-        return formData;
+        return new FormData(event.target);
     }
 
     serializeData(context) {
-        let data = {};
-        for (let pair of context.entries()) {
-            data[pair[0]]= new Date(pair[1]);
+        const data = {};
+        for (const [key, value] of context.entries()) {
+            data[key] = new Date(value);
         }
         return JSON.stringify(data);
     }
 
     eventHandler(res, event) {
-        var target = event.target.closest('.dropdown-menu');
+        const target = event.target.closest('.dropdown-menu');
         $(target).dropdown('toggle');
         const jsonContext = this.parseJsonContext();
         const projectId = jsonContext.project.id;
-        var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+        const gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
         gridLayoutTaskLoader.eventHandler();
     }
 }
-
-
 export class AbbreviatedNewMemberLoader extends BaseAbbreviatedEventHandler {
     constructor(member) {
         super();
@@ -801,21 +774,32 @@ export class AbbreviatedNewMemberLoader extends BaseAbbreviatedEventHandler {
     }
 
     eventHandler() {
-        var member = this.member;
-        var listGroupItem = $('<li>').addClass('list-group-item js-member').attr('data-member-id', member.person.id);
-        var listItemRow = $('<div>').addClass('row');
-        var memberFullName = $('<div>').addClass('col members-list__item js-member-full-name').text(`${member.person.first_name} ${member.person.last_name}`);
-        var memberRole = $('<div>').addClass('col members-list__item js-mebmer-full-name').text(`${member.role}`)
-        var memberEmail = $('<div>').addClass('col members-list__item js-member-email').text(`${member.person.email}`);
-        var memberRemove = $('<div>').addClass('col-md-1 text-center members-list__item member-remove-item js-remove-member');
-        var removeIcon = $('<i>').addClass('fas fa-trash');
-        var removeMemberEventHandler = new RemoveMemberEventHandler(memberRemove);
+        const { person, role } = this.member;
+        const listGroupItem = $('<li>')
+            .addClass('list-group-item js-member')
+            .attr('data-member-id', person.id);
+        const listItemRow = $('<div>').addClass('row');
+        
+        const memberFullName = $('<div>')
+            .addClass('col members-list__item js-member-full-name')
+            .text(`${person.first_name} ${person.last_name}`);
+        const memberRole = $('<div>')
+            .addClass('col members-list__item js-member-role')
+            .text(role);
+        const memberEmail = $('<div>')
+            .addClass('col members-list__item js-member-email')
+            .text(person.email);
+        const memberRemove = $('<div>')
+            .addClass('col-md-1 text-center members-list__item member-remove-item js-remove-member');
+        
+        const removeIcon = $('<i>').addClass('fas fa-trash');
+        const removeMemberEventHandler = new RemoveMemberEventHandler(memberRemove);
         removeMemberEventHandler.setupEventHandler();
+
         memberRemove.append(removeIcon);
         listItemRow.append([memberFullName, memberRole, memberEmail, memberRemove]);
-        
         listGroupItem.append(listItemRow);
-        $(this.membersList).append(listGroupItem);
+        this.membersList.append(listGroupItem);
     }
 }
 
@@ -824,7 +808,8 @@ export class AbbreviatedProjectNameLoader extends BaseAbbreviatedGETEventHandler
         super();
         this.projectId = projectId;
         this.element = $('.js-project-name');
-        if (this.element.length === 0) {
+
+        if (!this.element.length) {
             throw new Error('Element is unavailable.');
         }
     }
@@ -845,16 +830,19 @@ export class AbbreviatedProjectStatusLoader extends BaseAbbreviatedGETEventHandl
     constructor(projectId) {
         super();
         this.projectId = projectId;
-        var jsonContext = this.parseJsonContext();
+        const jsonContext = this.parseJsonContext();
         this.statuses = jsonContext.content.statuses;
         this.element = $('.js-project-status');
-        if (this.element.length === 0) {
+
+        if (!this.element.length) {
             throw new Error('Element is unavailable.');
         }
     }
+
     getEndpoint() {
         return `/api/v1/projects/${this.projectId}/?fields=status`;
     }
+
     success(data, target) {
         if (!data?.status) {
             throw new Error('Project status is undefined.');
@@ -868,6 +856,7 @@ export class AbbreviatedProjectStatusLoader extends BaseAbbreviatedGETEventHandl
     updateStatusElement(status) {
         this.element.removeClass(Object.values(this.statuses).map(s => s.class).join(' '));
         const newStatus = this.statuses[status];
+
         if (newStatus) {
             this.element.addClass(newStatus.class).text(newStatus.text);
         } else {
@@ -880,11 +869,12 @@ export class AbbreviatedProjectRoleLoader extends BaseAbbreviatedGETEventHandler
     constructor(projectId) {
         super();
         this.projectId = projectId;
-        this.element = $('.js-project-role');
-        var jsonContext = this.parseJsonContext();
+        const jsonContext = this.parseJsonContext();
         this.roles = jsonContext.content.roles;
         this.userId = jsonContext.user.id;
-        if (this.element.length === 0) {
+        this.element = $('.js-project-role');
+
+        if (!this.element.length) {
             throw new Error('Element is unavailable.');
         }
     }
@@ -895,6 +885,7 @@ export class AbbreviatedProjectRoleLoader extends BaseAbbreviatedGETEventHandler
 
     success(data) {
         const member = data.find(member => member.person.id === this.userId);
+
         if (!member) {
             throw new Error('Member was not found.');
         }
@@ -903,13 +894,12 @@ export class AbbreviatedProjectRoleLoader extends BaseAbbreviatedGETEventHandler
     }
 }
 
-//! AJAX Request spotted
 class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
     constructor(projectId) {
         super();
         this.projectId = projectId;
         this.noTasks = false;
-        var jsonContext = this.parseJsonContext();
+        const jsonContext = this.parseJsonContext();
         this.months = jsonContext.content.months;
         this.itemWidth = 30;
         this.chartLayoutContainer = $('.gantt-chart-container');
@@ -927,48 +917,25 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         return `/api/v1/projects/${this.projectId}`;
     }
 
-      
     success(data) {
-        const tasks = data.tasks;
-        if (!tasks.length) {
-            this.noTasks = true;
-        }
+        const tasks = data.tasks || [];
+        this.noTasks = !tasks.length;
 
         let firstTaskDatetime, lastTaskDatetime;
-        if (!this.noTasks) {
-            let key = 'start_datetime';
-            firstTaskDatetime = new Date(tasks.reduce((min, obj) => {
-                return obj[key] < min[key] ? obj : min;
-              }, tasks[0])[key]);
-            key = 'end_datetime';
-            lastTaskDatetime = new Date(tasks.reduce((max, obj) => {
-                return obj[key] > max[key] ? obj : max;
-              }, tasks[0])[key]);
-        } else {
+        if (this.noTasks) {
             firstTaskDatetime = new Date(data.start_date);
             lastTaskDatetime = new Date(firstTaskDatetime.getFullYear(), firstTaskDatetime.getMonth() + 2, firstTaskDatetime.getDate());
+        } else {
+            firstTaskDatetime = this.getExtremeTaskDate(tasks, 'start_datetime', Math.min);
+            lastTaskDatetime = this.getExtremeTaskDate(tasks, 'end_datetime', Math.max);
         }
 
         const gridMonths = this.getMonthYearArray(firstTaskDatetime, lastTaskDatetime);
         const dateObject = this.getDateObjects(gridMonths);
         this.setGridLayout(data, tasks, dateObject);
 
-        const editableEventHandler = new EditableEventHandler();
-        const dropdownEditableEventHandler = new DropdownEditableEventHandler();
-        const assigneesEventHandler = new TaskAssigneesEventHandler();
-        const datetimeEventHandler = new TaskDatetimeEventHandler();
-        const removeTaskEventHandler = new RemoveTaskEventHandler();
-        const syncScrollableEventHandler = new SyncScrollableEventHandler();
-        syncScrollableEventHandler.setupEventHandler();
-        removeTaskEventHandler.setupEventHandler();
-        editableEventHandler.setupEventHandler();
-        dropdownEditableEventHandler.setupEventHandler();
-        assigneesEventHandler.setupEventHandler();
-        datetimeEventHandler.setupEventHandler();
-        const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
-
+        this.initializeEventHandlers();
     }
-
 
     emptyAll() {
         this.gridLayoutMonthsElement.empty();
@@ -986,20 +953,14 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         let start = new Date(startDate);
         let end = new Date(endDate);
 
-        // Корректируем даты, чтобы начальная дата была раньше или равна конечной
-        if (start > end) {
-            [start, end] = [end, start];
-        }
-
-        // Проходим по всем месяцам между начальной и конечной датой включительно
-        while (start.getFullYear() < end.getFullYear() || (start.getFullYear() === end.getFullYear() && start.getMonth() <= end.getMonth())) {
-            result.push([start.getMonth() + 1, start.getFullYear()]); // Добавляем месяц и год в массив
-            start.setMonth(start.getMonth() + 1); // Переходим к следующему месяцу
+        while (start <= end) {
+            result.push([start.getMonth() + 1, start.getFullYear()]);
+            start.setMonth(start.getMonth() + 1);
         }
 
         return result;
     }
-    
+
     getDateObjects(gridMonths) {
         return gridMonths.map(([month, year]) => ({
             month,
@@ -1009,25 +970,28 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
     }
 
     setCalendarGrid(dateObject) {
-        for (let monthObj of dateObject) {
-            let monthHeader = $('<div>').addClass('header-container__item').text(`${this.months[monthObj.month-1]} ${monthObj.year}`).css({
-                width: `${monthObj.days*this.itemWidth}px`
-            });
-            $(this.gridLayoutMonthsElement).append(monthHeader);
-            let daysHeader = $('<div>').addClass('header-container__item header-container__days-container')
-            let daysRow = $('<div>').addClass('row');
-            for (let i=1; i <= monthObj.days; i++) {
-                let daysItem = $('<div>').addClass('header-container__item').text(i).css({
-                    width: `${this.itemWidth}px`
-                });
-                $(daysRow).append(daysItem);
-                $(daysHeader).append(daysRow);
+        dateObject.forEach(({ month, year, days }) => {
+            const monthHeader = $('<div>')
+                .addClass('header-container__item')
+                .text(`${this.months[month - 1]} ${year}`)
+                .css({ width: `${days * this.itemWidth}px` });
+            this.gridLayoutMonthsElement.append(monthHeader);
+
+            const daysHeader = $('<div>').addClass('header-container__item header-container__days-container');
+            const daysRow = $('<div>').addClass('row');
+            for (let i = 1; i <= days; i++) {
+                const daysItem = $('<div>')
+                    .addClass('header-container__item')
+                    .text(i)
+                    .css({ width: `${this.itemWidth}px` });
+                daysRow.append(daysItem);
             }
-            $(this.gridLayoutDaysElement).append(daysHeader);
-        }
+            daysHeader.append(daysRow);
+            this.gridLayoutDaysElement.append(daysHeader);
+        });
     }
 
-    calculateItemPosition(dateObject, startDate, endDate, itemWidth) {
+    calculateItemPosition(dateObject, startDate, endDate) {
         const startMonthIndex = dateObject.findIndex(obj => obj.month === startDate.getMonth() + 1 && obj.year === startDate.getFullYear());
         const endMonthIndex = dateObject.findIndex(obj => obj.month === endDate.getMonth() + 1 && obj.year === endDate.getFullYear());
 
@@ -1035,10 +999,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         const endOffset = this.calculateDateOffset(dateObject, endMonthIndex, endDate.getDate() - 1);
 
         const totalDays = endOffset - startOffset + 1;
-        const width = totalDays * itemWidth;
-        const leftPosition = startOffset * itemWidth;
-
-        return [width, leftPosition];
+        return [totalDays * this.itemWidth, startOffset * this.itemWidth];
     }
 
     calculateDateOffset(dateObject, monthIndex, dayOffset) {
@@ -1048,14 +1009,8 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
     setProjectBorders(tasks, dateObject) {
         if (!this.noTasks) {
             const tableItemWidth = $('.task-row__item').outerWidth();
-            let key = 'start_datetime';
-            const firstTaskDatetime = new Date(tasks.reduce((min, obj) => {
-                return obj[key] < min[key] ? obj : min;
-              }, tasks[0])[key]);
-            key = 'end_datetime';
-            const lastTaskDatetime = new Date(tasks.reduce((max, obj) => {
-                return obj[key] > max[key] ? obj : max;
-              }, tasks[0])[key]);
+            const firstTaskDatetime = this.getExtremeTaskDate(tasks, 'start_datetime', Math.min);
+            const lastTaskDatetime = this.getExtremeTaskDate(tasks, 'end_datetime', Math.max);
             const [width, leftPosition] = this.calculateItemPosition(dateObject, firstTaskDatetime, lastTaskDatetime, tableItemWidth);
 
             const projectPeriodElement = $('<div>').css({
@@ -1068,7 +1023,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
                 boxSizing: 'border-box'
             });
 
-            $(this.gridLayoutDaysElement).append(projectPeriodElement);
+            this.gridLayoutDaysElement.append(projectPeriodElement);
         }
     }
 
@@ -1077,7 +1032,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * this.itemWidth}px` });
         this.setCalendarGrid(dateObject);
 
-        tasks.forEach((task) => {
+        tasks.forEach(task => {
             const abbreviatedNewTaskLoader = new AbbreviatedNewTaskLoader(data, task, dateObject);
             abbreviatedNewTaskLoader.eventHandler();
         });
@@ -1085,6 +1040,23 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         this.setProjectBorders(tasks, dateObject);
     }
 
+    getExtremeTaskDate(tasks, key, comparator) {
+        return new Date(tasks.reduce((extreme, task) => comparator(task[key], extreme[key]) ? task : extreme)[key]);
+    }
+
+    initializeEventHandlers() {
+        const handlers = [
+            new EditableEventHandler(),
+            new DropdownEditableEventHandler(),
+            new TaskAssigneesEventHandler(),
+            new TaskDatetimeEventHandler(),
+            new RemoveTaskEventHandler(),
+            new SyncScrollableEventHandler(),
+            new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth())
+        ];
+
+        handlers.forEach(handler => handler.setupEventHandler());
+    }
 }
 
 class DropdownEditableEventHandler extends BaseAbbreviatedEventHandler {
@@ -1121,10 +1093,9 @@ class DropdownEditableEventHandler extends BaseAbbreviatedEventHandler {
 
     setupEventHandler() {
         this.setupDocumentClickEventHandler();
-        const dropdownItem = $('.js-dropdown-field-item');
-        $(dropdownItem).off('click');
-        this.setupDocumentClickEventHandler();
-        $(dropdownItem).on('click', event => {
+        const dropdownItems = $('.js-dropdown-field-item');
+        dropdownItems.off('click');
+        dropdownItems.on('click', event => {
             const target = event.target;
             event.stopPropagation();
             this.currentEditingElement = $(target);
@@ -1133,7 +1104,7 @@ class DropdownEditableEventHandler extends BaseAbbreviatedEventHandler {
     }
 
     saveAndDisableEditing(element) {
-        var data = this.serializeData(element);
+        const data = this.serializeData(element);
         this.endpoint = this.getEndpoint(element);
         this.sendPatchRequest(data, element);
     }
@@ -1141,70 +1112,59 @@ class DropdownEditableEventHandler extends BaseAbbreviatedEventHandler {
     getEndpoint(element) {
         const jsonContext = this.parseJsonContext();
         const projectId = jsonContext.project.id;
-        let endpoint;
         const entity = $(element).attr('data-entity');
         if (entity === 'project') {
-            endpoint = `api/v1/projects/${projectId}/`;
+            return `api/v1/projects/${projectId}/`;
         } else if (entity === 'task') {
             const taskId = $(element).attr('data-entity-id');
-            endpoint = `api/v1/projects/${projectId}/tasks/${taskId}/`;
+            return `api/v1/projects/${projectId}/tasks/${taskId}/`;
         } else {
             throw new Error('Unexpected entity name');
         }
-        return endpoint;
     }
 
     sendPatchRequest(data, element) {
-        if (this.endpoint === undefined) {
+        if (!this.endpoint) {
             throw new Error('Endpoint must be defined');
         }
         const csrftoken = this.getCSRFToken();
         $.ajax({
             type: 'PATCH',
             url: this.endpoint,
-            method: 'PATCH',
             contentType: 'application/json',
             beforeSend: xhr => {
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             },
             data: JSON.stringify(Object.fromEntries(data)),
-            success: data => this.success(data, element),
-            error: data => console.error(data)
+            success: responseData => this.success(responseData, element),
+            error: errorData => console.error(errorData)
         });
     }
 
     success(data, element) {
-        var jsonContext = this.parseJsonContext();
+        const jsonContext = this.parseJsonContext();
         if ($(element).attr('data-entity') === 'project') {
-            var projectStatusLoader = new AbbreviatedProjectStatusLoader(jsonContext.project.id);
-            projectStatusLoader.eventHandler()
-        }
-        else if($(element).attr('data-entity') === 'task') {
-            var jsonContext = this.parseJsonContext();
-            var task_statuses = jsonContext.content.task_statuses;
-            var targetTask = $(`.js-task-badge[data-task-id=${data.id}]`);
-            if (!targetTask) {
+            const projectStatusLoader = new AbbreviatedProjectStatusLoader(jsonContext.project.id);
+            projectStatusLoader.eventHandler();
+        } else if ($(element).attr('data-entity') === 'task') {
+            const taskStatuses = jsonContext.content.task_statuses;
+            const targetTask = $(`.js-task-badge[data-task-id=${data.id}]`);
+            if (!targetTask.length) {
                 throw new Error('No task with specified id found');
             }
-            targetTask.text(data.status).removeClass(Object.values(task_statuses).map(s => s.class).join(' '));
-            targetTask.addClass(task_statuses[data.status]['class']);
+            targetTask.text(data.status)
+                .removeClass(Object.values(taskStatuses).map(s => s.class).join(' '))
+                .addClass(taskStatuses[data.status].class);
         }
         this.hideDropdown();
     }
 
     getCSRFToken() {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, 10) === 'csrftoken=') {
-                    cookieValue = decodeURIComponent(cookie.substring(10));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+        const cookieValue = document.cookie
+            .split(';')
+            .map(cookie => cookie.trim())
+            .find(cookie => cookie.startsWith('csrftoken='));
+        return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : null;
     }
 }
 
@@ -1215,19 +1175,19 @@ export class MembersLoader extends BaseAbbreviatedGETEventHandler {
     }
 
     getEndpoint() {
-        let jsonContext = this.parseJsonContext();
-        var projectId = jsonContext.project.id;
-        return `/api/v1/projects/${projectId}/members/`
+        const jsonContext = this.parseJsonContext();
+        const projectId = jsonContext.project.id;
+        return `/api/v1/projects/${projectId}/members/`;
     }
+
     success(data) {
-        $(this.membersContainer).empty();
+        this.membersContainer.empty();
         data.forEach(member => {
-            var addNewMemberEventHandler = new AbbreviatedNewMemberLoader(member);
-            addNewMemberEventHandler.eventHandler(member);
+            const newMemberLoader = new AbbreviatedNewMemberLoader(member);
+            newMemberLoader.eventHandler();
         });
     }
 }
-
 
 export class AbbreviatedProjectLoader extends BaseAbbreviatedEventHandler {
     constructor(projectId) {
@@ -1237,7 +1197,6 @@ export class AbbreviatedProjectLoader extends BaseAbbreviatedEventHandler {
         this.projectStatusLoader = new AbbreviatedProjectStatusLoader(projectId);
         this.projectRoleLoader = new AbbreviatedProjectRoleLoader(projectId);
         this.gridLayoutLoader = new GridLayoutTaskLoader(projectId);
-        //members tab
         this.membersLoader = new MembersLoader();
         this.editableEventHandler = new EditableEventHandler();
         this.dropdownEditableEventHandler = new DropdownEditableEventHandler();
@@ -1248,15 +1207,14 @@ export class AbbreviatedProjectLoader extends BaseAbbreviatedEventHandler {
 
     async saveProjectState(projectId) {
         const updates = {
-            'project': {
-                'id': projectId
+            project: {
+                id: projectId
             }
-        }
+        };
         const abbreviatedContextDataUpdater = new AbbreviatedContextDataUpdater();
         await abbreviatedContextDataUpdater.eventHandler(updates);
     }
 
-    // Event handler method
     eventHandler(data) {
         this.saveProjectState(data.id).then(() => {
             this.projectNameLoader.eventHandler();
@@ -1275,13 +1233,15 @@ export class ProjectListElementHandler extends BaseGETEventHandler {
     }
 
     _getElement() {
-        return;
+        return this.element;
     }
+
     assignEvent(event) {
         return event;
     }
+
     getEndpoint(event) {
-        var target = event.target.closest(this.selector);
+        const target = event.target.closest(this.selector);
         const projectId = $(target).attr('data-project-id');
         return `/api/v1/projects/${projectId}/`;
     }
@@ -1293,13 +1253,12 @@ export class ProjectListElementHandler extends BaseGETEventHandler {
     }
 }
 
-//! AJAX Request spotted
 export class ProjectListLoader extends BaseGETEventHandler {
     constructor() {
-        let e = 'shown.bs.modal';
+        const event = 'shown.bs.modal';
         const selector = '#modal-project-list';
         const endpoint = '/api/v1/projects/?fields=id,name,start_date';
-        super(selector, e, endpoint);
+        super(selector, event, endpoint);
         this.projectListElement = $('.js-project-list');
         this.isEmpty = false;
 
@@ -1311,19 +1270,23 @@ export class ProjectListLoader extends BaseGETEventHandler {
     eventHandler(res, event) {
         $(this.projectListElement).empty();
         res.results.forEach(project => {
-            const listItem = $('<li>').addClass('list-group-item project-list__item js-project-list-item').attr('data-project-id', project.id);
+            const listItem = $('<li>')
+                .addClass('list-group-item project-list__item js-project-list-item')
+                .attr('data-project-id', project.id);
             const projectNameSpan = $('<span>').text(project.name);
-            const projectStartDateSpan = $('<span>').addClass('badge badge-primary').text(project.start_date);
-            $(listItem).append([projectNameSpan, projectStartDateSpan]);
+            const projectStartDateSpan = $('<span>')
+                .addClass('badge badge-primary')
+                .text(project.start_date);
+            listItem.append(projectNameSpan, projectStartDateSpan);
+            
             const handler = new ProjectListElementHandler(listItem);
             handler.setupEventHandler();
-            $(this.projectListElement).append(listItem);
+            this.projectListElement.append(listItem);
         });
     }
 }
 
-
-export class DraggableGridEventHandler extends BaseHandler {
+class DraggableGridEventHandler extends BaseHandler {
     constructor(selector, gridX = 30) {
         super(selector, 'dragmove');
         this.gridX = gridX;
@@ -1331,8 +1294,7 @@ export class DraggableGridEventHandler extends BaseHandler {
     }
 
     initDraggable() {
-        this.elements = document.querySelectorAll(this.selector);
-        this.elements.forEach(element => {
+        document.querySelectorAll(this.selector).forEach(element => {
             let x = 0;
 
             // Align initial position to the grid
@@ -1346,97 +1308,86 @@ export class DraggableGridEventHandler extends BaseHandler {
                 element.style.transform = `translate(0px, 0px)`;
             }
 
-            interact(element)
-                .draggable({
-                    modifiers: [
-                        interact.modifiers.snap({
-                            targets: [
-                                interact.createSnapGrid({ x: this.gridX, y: 1 }) // Привязка только по горизонтали
-                            ],
-                            range: Infinity,
-                            relativePoints: [{ x: 0, y: 0 }]
-                        }),
-                        interact.modifiers.restrict({
-                            restriction: element.parentNode,
-                            elementRect: { top: 0, left: 0, bottom: 1, right: 1 },
-                            endOnly: true
-                        })
-                    ],
-                    inertia: true
-                })
-                .on('dragstart', (event) => {
-                    const transform = event.target.style.transform;
-                    const match = transform.match(/translate\(([^px]*)px, ([^px]*)px\)/);
-                    if (match) {
-                        x = parseFloat(match[1]);
-                    } else {
-                        x = 0;
-                    }
-                })
-                .on('dragmove', (event) => {
-                    x += event.dx;
+            interact(element).draggable({
+                modifiers: [
+                    interact.modifiers.snap({
+                        targets: [
+                            interact.createSnapGrid({ x: this.gridX, y: 1 }) // Snap only horizontally
+                        ],
+                        range: Infinity,
+                        relativePoints: [{ x: 0, y: 0 }]
+                    }),
+                    interact.modifiers.restrict({
+                        restriction: element.parentNode,
+                        elementRect: { top: 0, left: 0, bottom: 1, right: 1 },
+                        endOnly: true
+                    })
+                ],
+                inertia: true
+            }).on('dragstart', event => {
+                const transform = event.target.style.transform;
+                const match = transform.match(/translate\(([^px]*)px, ([^px]*)px\)/);
+                if (match) {
+                    x = parseFloat(match[1]);
+                } else {
+                    x = 0;
+                }
+            }).on('dragmove', event => {
+                x += event.dx;
 
-                    const snappedXRel = Math.round(x / this.gridX);
-                    const snappedXAbs = snappedXRel * this.gridX;
+                const snappedXRel = Math.round(x / this.gridX);
+                const snappedXAbs = snappedXRel * this.gridX;
 
+                event.target.style.transform = `translate(${snappedXAbs}px, 0px)`;
+            }).on('dragend', event => {
+                const transform = event.target.style.transform;
+                const match = transform.match(/translate\(([^px]*)px, ([^px]*)px\)/);
+                let finalX = 0;
+                if (match) {
+                    finalX = parseFloat(match[1]);
+                }
+                const snappedXRel = Math.round(finalX / this.gridX);
+                const taskId = event.target.getAttribute('data-task-id');
+                const projectId = this.parseJsonContext().project.id;
 
-                    event.target.style.transform = `translate(${snappedXAbs}px, 0px)`;
-                })
-                .on('dragend', (event) => {
-                    const transform = event.target.style.transform;
-                    const match = transform.match(/translate\(([^px]*)px, ([^px]*)px\)/);
-                    let finalX = 0;
-                    if (match) {
-                        finalX = parseFloat(match[1]);
-                    }
-                    const snappedXRel = Math.round(finalX / this.gridX);
-                    var targetStartDatetime = new Date($(event.target).attr('data-field-start-datetime'));
-                    var targetEndDatetime = new Date($(event.target).attr('data-field-end-datetime'));
-                    var taskId = $(event.target).attr('data-task-id');
-                    var projectId = this.parseJsonContext().project.id;
-                    
-                    var data = {'start_datetime': new Date(targetStartDatetime.getFullYear(),
-                                                            targetStartDatetime.getMonth(),
-                                                            targetStartDatetime.getDate()+snappedXRel,
-                                                            targetStartDatetime.getHours(),
-                                                            targetStartDatetime.getMinutes()),
-                                'end_datetime': new Date(targetEndDatetime.getFullYear(),
-                                                            targetEndDatetime.getMonth(),
-                                                            targetEndDatetime.getDate()+snappedXRel,
-                                                            targetEndDatetime.getHours(),
-                                                            targetEndDatetime.getMinutes())}
-                    var csrftoken = this.getCSRFToken();
-                    $.ajax({
-                        url: `api/v1/projects/${projectId}/tasks/${taskId}/`,
-                        type: 'PATCH',
-                        contentType: 'application/json',
-                        data: JSON.stringify(data),
-                        beforeSend: (xhr) => {
-                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                        },
-                        success: (res) => {
-                            const jsonContext = this.parseJsonContext();
-                            const projectId = jsonContext.project.id;
-                            var gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
-                            gridLayoutTaskLoader.eventHandler();
-                        },
-                        error: (_xhr, textStatus, errorThrown) => {
-                            if (textStatus === "timeout") {
-                                console.error("Request timed out.");
-                            } else {
-                                console.error("Request failed: " + textStatus, errorThrown);
-                            }
+                const targetStartDatetime = new Date(event.target.getAttribute('data-field-start-datetime'));
+                const targetEndDatetime = new Date(event.target.getAttribute('data-field-end-datetime'));
+                const data = {
+                    'start_datetime': new Date(targetStartDatetime.getFullYear(), targetStartDatetime.getMonth(), targetStartDatetime.getDate() + snappedXRel, targetStartDatetime.getHours(), targetStartDatetime.getMinutes()),
+                    'end_datetime': new Date(targetEndDatetime.getFullYear(), targetEndDatetime.getMonth(), targetEndDatetime.getDate() + snappedXRel, targetEndDatetime.getHours(), targetEndDatetime.getMinutes())
+                };
+                const csrftoken = this.getCSRFToken();
+                $.ajax({
+                    url: `api/v1/projects/${projectId}/tasks/${taskId}/`,
+                    type: 'PATCH',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    beforeSend: xhr => {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    success: res => {
+                        const jsonContext = this.parseJsonContext();
+                        const projectId = jsonContext.project.id;
+                        const gridLayoutTaskLoader = new GridLayoutTaskLoader(projectId);
+                        gridLayoutTaskLoader.eventHandler();
+                    },
+                    error: (_xhr, textStatus, errorThrown) => {
+                        if (textStatus === "timeout") {
+                            console.error("Request timed out.");
+                        } else {
+                            console.error("Request failed: " + textStatus, errorThrown);
                         }
-                    });
+                    }
                 });
-
+            });
         });
     }
+
     getCSRFToken() {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
-            for (let i = 0; cookies.length; i++) {
+            for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 if (cookie.substring(0, 10) === 'csrftoken=') {
                     cookieValue = decodeURIComponent(cookie.substring(10));
@@ -1452,12 +1403,13 @@ export class DraggableGridEventHandler extends BaseHandler {
     }
 }
 
+
 export class ResetFormEventHandler extends BaseDefaultEventHandler {
     constructor() {
         super('.js-form', 'submit');
     }
 
     eventHandler() {
-        $('input:not([type=hidden])').val('');
+        $('.js-form input[type="text"], .js-form input[type="email"]').val('');
     }
 }
