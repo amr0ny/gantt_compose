@@ -1290,7 +1290,6 @@ class DraggableGridEventHandler extends BaseHandler {
     constructor(selector, gridX = 30) {
         super(selector, 'dragmove');
         this.gridX = gridX;
-        this.initDraggable();
     }
 
     initDraggable() {
@@ -1398,6 +1397,9 @@ class DraggableGridEventHandler extends BaseHandler {
         return cookieValue;
     }
 
+    setupEventHandler() {
+        this.initDraggable();
+    }
     eventHandler(event) {
         // This method could be extended for custom handling.
     }
