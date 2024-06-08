@@ -655,7 +655,7 @@ class AbbreviatedNewTaskLoader extends BaseAbbreviatedEventHandler {
         const taskRowContainer = this.createElement('div', ['row', 'gantt-chart__task-row', 'task-row'], { 'data-task-id': this.task.id });
 
         this.dateObject.forEach(monthObj => {
-            const taskColumn = this.createElement('div', ['col', 'task-row__month-col']);
+            const taskColumn = this.createElement('div', ['task-row__month-col']);
             const taskRow = this.createElement('div', ['row', 'h-100']);
             for (let i = 1; i <= monthObj.days; i++) {
                 taskRow.append(this.createElement('div', ['task-row__item', 'col']));
@@ -905,13 +905,13 @@ export class AbbreviatedProjectRoleLoader extends BaseAbbreviatedGETEventHandler
 
 //! AJAX Request spotted
 class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
-    constructor(projectId, viewMode = 'days') {
+    constructor(projectId) {
         super();
         this.projectId = projectId;
-        this.viewMode = viewMode;  // 'days', 'weeks', 'months'
         this.noTasks = false;
         var jsonContext = this.parseJsonContext();
         this.months = jsonContext.content.months;
+        this.itemWidth = 30;
         this.chartLayoutContainer = $('.gantt-chart-container');
         this.gridLayoutContainer = $('.js-grid-layout-container');
         this.gridTableContainer = $('.js-grid-layout-table-container');
@@ -927,6 +927,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         return `/api/v1/projects/${this.projectId}`;
     }
 
+      
     success(data) {
         const tasks = data.tasks;
         if (!tasks.length) {
@@ -965,7 +966,9 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         assigneesEventHandler.setupEventHandler();
         datetimeEventHandler.setupEventHandler();
         const draggableGridEventHandler = new DraggableGridEventHandler('.js-snap-draggable', $('.task-row__item').outerWidth());
+
     }
+
 
     emptyAll() {
         this.gridLayoutMonthsElement.empty();
@@ -983,18 +986,20 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         let start = new Date(startDate);
         let end = new Date(endDate);
 
+        // Корректируем даты, чтобы начальная дата была раньше или равна конечной
         if (start > end) {
             [start, end] = [end, start];
         }
 
+        // Проходим по всем месяцам между начальной и конечной датой включительно
         while (start.getFullYear() < end.getFullYear() || (start.getFullYear() === end.getFullYear() && start.getMonth() <= end.getMonth())) {
-            result.push([start.getMonth() + 1, start.getFullYear()]);
-            start.setMonth(start.getMonth() + 1);
+            result.push([start.getMonth() + 1, start.getFullYear()]); // Добавляем месяц и год в массив
+            start.setMonth(start.getMonth() + 1); // Переходим к следующему месяцу
         }
 
         return result;
     }
-
+    
     getDateObjects(gridMonths) {
         return gridMonths.map(([month, year]) => ({
             month,
@@ -1005,12 +1010,16 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
 
     setCalendarGrid(dateObject) {
         for (let monthObj of dateObject) {
-            let monthHeader = $('<div>').addClass('header-container__item col').text(`${this.months[monthObj.month-1]} ${monthObj.year}`);
+            let monthHeader = $('<div>').addClass('header-container__item').text(`${this.months[monthObj.month-1]} ${monthObj.year}`).css({
+                width: `${monthObj.days*this.itemWidth}px`
+            });
             $(this.gridLayoutMonthsElement).append(monthHeader);
-            let daysHeader = $('<div>').addClass('header-container__item col');
+            let daysHeader = $('<div>').addClass('header-container__item header-container__days-container')
             let daysRow = $('<div>').addClass('row');
-            for (let i = 1; i <= monthObj.days; i++) {
-                let daysItem = $('<div>').addClass('header-container__item col').text(i);
+            for (let i=1; i <= monthObj.days; i++) {
+                let daysItem = $('<div>').addClass('header-container__item').text(i).css({
+                    width: `${this.itemWidth}px`
+                });
                 $(daysRow).append(daysItem);
                 $(daysHeader).append(daysRow);
             }
@@ -1018,49 +1027,22 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         }
     }
 
-    setWeekCalendarGrid(dateObject) {
-        for (let monthObj of dateObject) {
-            let monthHeader = $('<div>').addClass('header-container__item col').text(`${this.months[monthObj.month-1]} ${monthObj.year}`);
-            $(this.gridLayoutMonthsElement).append(monthHeader);
-            let weeksHeader = $('<div>').addClass('header-container__item col');
-            let weeksRow = $('<div>').addClass('row');
-            const weeks = Math.ceil(monthObj.days / 7);
-            for (let i = 1; i <= weeks; i++) {
-                let weeksItem = $('<div>').addClass('header-container__item col').text(`Week ${i}`);
-                $(weeksRow).append(weeksItem);
-                $(weeksHeader).append(weeksRow);
-            }
-            $(this.gridLayoutDaysElement).append(weeksHeader);
-        }
+    calculateItemPosition(dateObject, startDate, endDate, itemWidth) {
+        const startMonthIndex = dateObject.findIndex(obj => obj.month === startDate.getMonth() + 1 && obj.year === startDate.getFullYear());
+        const endMonthIndex = dateObject.findIndex(obj => obj.month === endDate.getMonth() + 1 && obj.year === endDate.getFullYear());
+
+        const startOffset = this.calculateDateOffset(dateObject, startMonthIndex, startDate.getDate() - 1);
+        const endOffset = this.calculateDateOffset(dateObject, endMonthIndex, endDate.getDate() - 1);
+
+        const totalDays = endOffset - startOffset + 1;
+        const width = totalDays * itemWidth;
+        const leftPosition = startOffset * itemWidth;
+
+        return [width, leftPosition];
     }
 
-    setMonthCalendarGrid(dateObject) {
-        dateObject.forEach(monthObj => {
-            let monthHeader = $('<div>').addClass('header-container__item col').text(`${this.months[monthObj.month - 1]} ${monthObj.year}`);
-            $(this.gridLayoutMonthsElement).append(monthHeader);
-        });
-    }
-
-    setGridLayout(data, tasks, dateObject) {
-        this.emptyAll();
-        let itemWidth = 29;
-        let widthFactor = this.viewMode === 'weeks' ? 4 : this.viewMode === 'months' ? 1 : 1;
-        this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * itemWidth / widthFactor}px` });
-
-        if (this.viewMode === 'days') {
-            this.setCalendarGrid(dateObject);
-        } else if (this.viewMode === 'weeks') {
-            this.setWeekCalendarGrid(dateObject);
-        } else if (this.viewMode === 'months') {
-            this.setMonthCalendarGrid(dateObject);
-        }
-
-        tasks.forEach((task) => {
-            const abbreviatedNewTaskLoader = new AbbreviatedNewTaskLoader(data, task, dateObject, this.viewMode);
-            abbreviatedNewTaskLoader.eventHandler();
-        });
-
-        this.setProjectBorders(tasks, dateObject);
+    calculateDateOffset(dateObject, monthIndex, dayOffset) {
+        return dateObject.slice(0, monthIndex).reduce((sum, obj) => sum + obj.days, 0) + dayOffset;
     }
 
     setProjectBorders(tasks, dateObject) {
@@ -1090,25 +1072,20 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         }
     }
 
-    calculateItemPosition(dateObject, startDate, endDate, itemWidth) {
-        const startMonthIndex = dateObject.findIndex(obj => obj.month === startDate.getMonth() + 1 && obj.year === startDate.getFullYear());
-        const endMonthIndex = dateObject.findIndex(obj => obj.month === endDate.getMonth() + 1 && obj.year === endDate.getFullYear());
+    setGridLayout(data, tasks, dateObject) {
+        this.emptyAll();
+        this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * this.itemWidth}px` });
+        this.setCalendarGrid(dateObject);
 
-        const startOffset = this.calculateDateOffset(dateObject, startMonthIndex, startDate.getDate() - 1);
-        const endOffset = this.calculateDateOffset(dateObject, endMonthIndex, endDate.getDate() - 1);
+        tasks.forEach((task) => {
+            const abbreviatedNewTaskLoader = new AbbreviatedNewTaskLoader(data, task, dateObject);
+            abbreviatedNewTaskLoader.eventHandler();
+        });
 
-        const totalDays = endOffset - startOffset + 1;
-        const width = totalDays * itemWidth;
-        const leftPosition = startOffset * itemWidth;
-
-        return [width, leftPosition];
+        this.setProjectBorders(tasks, dateObject);
     }
 
-    calculateDateOffset(dateObject, monthIndex, dayOffset) {
-        return dateObject.slice(0, monthIndex).reduce((sum, obj) => sum + obj.days, 0) + dayOffset;
-    }
 }
-
 
 class DropdownEditableEventHandler extends BaseAbbreviatedEventHandler {
     constructor() {
@@ -1259,7 +1236,7 @@ export class AbbreviatedProjectLoader extends BaseAbbreviatedEventHandler {
         this.projectNameLoader = new AbbreviatedProjectNameLoader(projectId);
         this.projectStatusLoader = new AbbreviatedProjectStatusLoader(projectId);
         this.projectRoleLoader = new AbbreviatedProjectRoleLoader(projectId);
-        this.gridLayoutLoader = new GridLayoutTaskLoader(projectId, 'months');
+        this.gridLayoutLoader = new GridLayoutTaskLoader(projectId);
         //members tab
         this.membersLoader = new MembersLoader();
         this.editableEventHandler = new EditableEventHandler();

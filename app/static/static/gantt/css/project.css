@@ -110,14 +110,23 @@ width: 240px;
     display:flex;
     flex-direction: row;
     border-bottom: 1px solid rgba(0,0,0,.125);
+    border-right: none;
     background-color: #f8f9fa;
 }
+
+.header-container__days-container {
+    border-right: none !important;
+}
+
 .gantt-chart .row {
     margin: 0 !important;
 }
 .gantt-chart__header-container {
     height: 20px;
+    display: flex;
+    flex-direction: column;
 }
+
 
 .header-container__item {
     text-align: center;
@@ -131,9 +140,6 @@ width: 240px;
 .gant-chart__task-cell {
     border-right: 1px solid rgba(0,0,0,.125);
     padding:0;
-}
-.header-container__item:last-child {
-    border-right: none;
 }
 
 .chart-table-data-wrapper,
