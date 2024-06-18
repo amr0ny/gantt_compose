@@ -114,6 +114,10 @@ width: 240px;
     background-color: #f8f9fa;
 }
 
+.chart-table-btns {
+    border-right: none;
+}
+
 .header-container__days-container {
     border-right: none !important;
 }
