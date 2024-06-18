@@ -1084,8 +1084,6 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
 
         this.setProjectBorders(tasks, dateObject);
     }
-
-    
 }
 
 class DropdownEditableEventHandler extends BaseAbbreviatedEventHandler {
