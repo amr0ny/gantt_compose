@@ -935,7 +935,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
         }
 
         let firstTaskDatetime, lastTaskDatetime;
-        if (!this.noTasks) {
+                if (!this.noTasks) {
             let key = 'start_datetime';
             firstTaskDatetime = new Date(tasks.reduce((min, obj) => {
                 return obj[key] < min[key] ? obj : min;
@@ -1001,14 +1001,15 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
     }
     
     getDateObjects(gridMonths) {
-        return gridMonths.map(([month, year]) => ({
-            month,
-            year,
-            days: this.getDaysInMonth(year, month - 1)
-        }));
+            return gridMonths.map(([month, year]) => ({
+                month,
+                year,
+                days: this.getDaysInMonth(year, month - 1)
+            }));
     }
 
-    setCalendarGrid(dateObject) {
+    setCalendarGrid(dateObject) { 
+        this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * this.itemWidth}px` });
         for (let monthObj of dateObject) {
             let monthHeader = $('<div>').addClass('header-container__item').text(`${this.months[monthObj.month-1]} ${monthObj.year}`).css({
                 width: `${monthObj.days*this.itemWidth}px`
@@ -1075,8 +1076,7 @@ class GridLayoutTaskLoader extends BaseAbbreviatedGETEventHandler {
     setGridLayout(data, tasks, dateObject) {
         this.emptyAll();
         this.chartLayoutContainer.css({ width: `${dateObject.reduce((sum, { days }) => sum + days, 0) * this.itemWidth}px` });
-        this.setCalendarGrid(dateObject);
-
+            this.setCalendarGrid(dateObject);
         tasks.forEach((task) => {
             const abbreviatedNewTaskLoader = new AbbreviatedNewTaskLoader(data, task, dateObject);
             abbreviatedNewTaskLoader.eventHandler();
