@@ -1,11 +1,10 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import m
 from django.contrib.auth.models import AbstractUser
 from gantt.mixins import TimeStampedMixin, UUIDMixin
 
 
-# TODO: constraints which are essential
-
+# TODO: constraints which are essentialAcp
 class Person(AbstractUser):
     class Meta:
         db_table = "content\".\"person"
